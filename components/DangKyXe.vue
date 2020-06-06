@@ -50,34 +50,64 @@
                           <v-form ref="formCreateOrUpdate">
                             <v-row>
                               <v-col>
-                                <v-text-field
-                                  v-model="dangKy.SoCho"
+                                <v-select
+                                  v-model="soCho"
+                                  :items="listSoChoNgoi"
+                                  item-text="LoaiXe"
+                                  item-value="SoCho"
                                   label="Số chổ"
                                   :rules="[rules.required]"
-                                ></v-text-field>
+                                  @input="dangKy['SoCho'] = soCho"
+                                ></v-select>
                               </v-col>
                               <v-col>
                                 <v-text-field
-                                  v-model="dangKy.SoNguoiDi"
+                                  v-model="soNguoiDi"
                                   label="Số người đi"
                                   :rules="[rules.required]"
+                                  :hint="
+                                    soNguoiDi > soCho
+                                      ? 'Số người đi lớn hơn số chổ!'
+                                      : ''
+                                  "
+                                  @input="dangKy['SoNguoiDi'] = soNguoiDi"
                                 ></v-text-field>
                               </v-col>
                             </v-row>
                             <v-row>
                               <v-col>
                                 <v-datetime-picker
-                                  v-model="dangKy.dateTimeDepart"
+                                  v-model="dateTimeDepart"
                                   clear-text="Hủy"
-                                  label="Ngày Đi"
+                                  label="Thời gian Đi"
+                                  :text-field-props="{
+                                    rules: [rules.required, ruleDate],
+                                    'persistent-hint': true,
+                                    hint: 'yyyy-MM-dd HH:mm',
+                                  }"
+                                  @input="
+                                    dangKy['ThoiGianDi'] = $moment(
+                                      dateTimeDepart
+                                    ).format('YYYY-MM-DD HH:mm')
+                                  "
                                 >
                                 </v-datetime-picker>
                               </v-col>
                               <v-col>
                                 <v-datetime-picker
-                                  v-model="dangKy.dateTimeArrive"
+                                  v-model="dateTimeArrive"
                                   clear-text="Hủy"
-                                  label="Ngày đến"
+                                  label="Thời gian về"
+                                  :text-field-props="{
+                                    rules: [rules.required, ruleDate],
+                                    'persistent-hint': true,
+                                    hint: 'yyyy-MM-dd HH:mm',
+                                  }"
+                                  @input="
+                                    dangKy['ThoiGianVe'] = $moment(
+                                      dateTimeArrive
+                                    ).format('YYYY-MM-DD HH:mm')
+                                  "
                                 >
                                 </v-datetime-picker>
                               </v-col>
@@ -85,23 +115,35 @@
                             <v-row>
                               <v-col>
                                 <v-textarea
-                                  v-model="dangKy.placeDepart"
+                                  v-model="placeDepart"
                                   label="Địa điểm khởi hành"
-                                  :rules="[rules.required]"
+                                  :rules="[
+                                    rules.required,
+                                    rules.maxLength.bind(null, 300),
+                                  ]"
+                                  @input="dangKy['DiemKhoiHanh'] = placeDepart"
                                 ></v-textarea>
                               </v-col>
                               <v-col>
                                 <v-textarea
                                   v-model="placeArrive"
                                   label="Địa điểm đến"
-                                  :rules="[rules.required]"
+                                  :rules="[
+                                    rules.required,
+                                    rules.maxLength.bind(null, 300),
+                                  ]"
+                                  @input="dangKy['NoiDen'] = placeArrive"
                                 ></v-textarea>
                               </v-col>
                             </v-row>
                             <v-textarea
-                              v-model="dangKy.reason"
+                              v-model="reason"
                               label="Lý do"
-                              :rules="[rules.required]"
+                              :rules="[
+                                rules.required,
+                                rules.maxLength.bind(null, 300),
+                              ]"
+                              @input="dangKy['LyDoDi'] = reason"
                             ></v-textarea>
                           </v-form>
                         </v-col>
@@ -113,11 +155,12 @@
                     <v-spacer></v-spacer>
                     <v-btn
                       color="blue darken-1"
-                      text
+                      dark
                       @click="createOrUpdate(dangKy)"
                     >
                       Đồng ý
                     </v-btn>
+                    <v-spacer></v-spacer>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
@@ -146,6 +189,7 @@
                       Đồng ý
                     </v-btn>
                     <v-btn
+                      dark=""
                       color="red darken-1"
                       text
                       @click="dialogRemove = false"
@@ -160,13 +204,14 @@
 
           <template v-slot:item.actions="{ item }">
             <v-icon
+              v-if="item.TinhTrang === 1"
               small
               class="mr-2"
               @click="createOrEditItem({ type: 'edit', data: item })"
             >
               mdi-pencil
             </v-icon>
-            <v-icon small @click="removeItem(item)">
+            <v-icon v-if="item.TinhTrang === 1" small @click="removeItem(item)">
               mdi-delete
             </v-icon>
           </template>
@@ -189,37 +234,61 @@ export default {
     dialogRemove: false,
     rules: {
       required: value => !!value || 'Không được bỏ trống trường này',
+      maxLength: (max, value = '') =>
+        (value && value.length <= max) || `Không được quá ${max} ký tự`,
     },
     headers: [
-      { text: 'Biển số xe', value: 'BienSo' },
+      { text: 'Thời gian đi', value: 'NgayDi' },
+      { text: 'Thời gian về', value: 'NgayVe' },
       { text: 'Số chổ', value: 'SoCho' },
-      { text: 'Tài xế', value: 'HoTenTX' },
+      { text: 'Lý do', value: 'LyDoDi' },
+      { text: 'Tình trạng', value: 'GhiChuTinhTrang' },
+      { text: 'Ghi chú', value: 'GhiChu' },
       { text: '', value: 'actions', sortable: false },
     ],
-
     listDangKy: [],
-    dangKy: {
-      dateTimeDepart: null,
-      placeDepart: null,
-      dateTimeArrive: null,
-      placeArrive: null,
-      reason: null,
-    },
+    dateTimeDepart: null,
+    placeDepart: null,
+    dateTimeArrive: null,
+    placeArrive: null,
+    reason: null,
+    soCho: null,
+    soNguoiDi: null,
+    dangKy: {},
+    listSoChoNgoi: [],
   }),
+  computed: {
+    ruleDate() {
+      const today = new Date();
+      const ngayDi = new Date(this.dateTimeDepart);
+      const ngayDen = new Date(this.dateTimeArrive);
+
+      if (ngayDi.getTime() < today.getTime()) return 'Ngày không hợp lệ';
+      if (ngayDi.getDay() === 0) return 'Không thể đặt xe vào chủ nhật';
+
+      return ngayDi.getTime() < ngayDen.getTime() || 'Thời gian không hợp lệ';
+    },
+  },
   created() {
     this.getListDangKy();
+    this.getListSoChoNgoi();
   },
+
   methods: {
+    async getListSoChoNgoi() {
+      const { data } = await this.$axios(API.getSoChoNgoiTrenXe());
+      this.listSoChoNgoi = data;
+    },
+
     async getListDangKy() {
       const { data } = await this.$axios(API.getListDangKyXe());
       this.listDangKy = data;
-      console.log(data);
     },
 
     createOrEditItem({ type, data = {} }) {
       const dangKy = {
         formTitle: type === 'create' ? 'Thêm xe' : 'Sửa xe',
-        XeID: type === 'create' ? 0 : undefined,
+        MaDK: type === 'create' ? 0 : undefined,
         ...data,
       };
 
@@ -229,8 +298,8 @@ export default {
 
     removeItem(data) {
       const dangKy = {
-        formTitle: 'Xóa xe',
-        message: `Bạn có chắc chắn muốn xóa xe "${data.BienSo}"`,
+        formTitle: 'Xóa đăng ký xe',
+        message: `Bạn có chắc chắn muốn xóa đăng ký này`,
         ...data,
       };
 
@@ -238,16 +307,13 @@ export default {
       this.dialogRemove = true;
     },
 
-    async createOrUpdate(xe) {
+    async createOrUpdate(dangKy) {
       const { formCreateOrUpdate, SnackBar } = this.$refs;
       if (!formCreateOrUpdate.validate()) return;
 
-      xe = {
-        ...xe,
-        TaiXeID: this.taiXeId,
-      };
-
-      const { data } = await this.$axios(API.createOrUpdateXe({ xe }));
+      const { data } = await this.$axios(
+        API.createOrUpdateDangKyXe({ dangKy })
+      );
 
       if (data?.error && data?.error) {
         const { message } = data;
@@ -263,12 +329,13 @@ export default {
           message,
         });
         this.dialogCreateOrUpdate = false;
+        formCreateOrUpdate.reset();
         this.getListDangKy();
       }
     },
 
-    async remove(xe) {
-      const { data } = await this.$axios(API.deleteXe({ xe }));
+    async remove(dangKy) {
+      const { data } = await this.$axios(API.deleteDangKyXe({ dangKy }));
 
       if (data?.error && data?.error) {
         const { message } = data;

@@ -46,11 +46,14 @@
                               label="Biển số xe"
                               :rules="[rules.required]"
                             ></v-text-field>
-                            <v-text-field
+                            <v-select
                               v-model="xe.SoCho"
+                              :items="listSoChoNgoi"
+                              item-text="LoaiXe"
+                              item-value="SoCho"
                               label="Số chổ"
                               :rules="[rules.required]"
-                            ></v-text-field>
+                            ></v-select>
                             <v-select
                               v-model="taiXeId"
                               :items="listTaiXe"
@@ -163,11 +166,18 @@ export default {
     listTaiXe: [],
     taiXeId: null,
     xe: {},
+    listSoChoNgoi: [],
   }),
   created() {
     this.getListXe();
+    this.getListSoChoNgoi();
   },
   methods: {
+    async getListSoChoNgoi() {
+      const { data } = await this.$axios(API.getSoChoNgoiTrenXe());
+      this.listSoChoNgoi = data;
+    },
+
     async getListXe() {
       const { data } = await this.$axios(API.getListXe());
       this.listXe = data;

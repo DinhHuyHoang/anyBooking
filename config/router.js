@@ -4,9 +4,4 @@ module.exports = [
     path: '/',
     component: 'pages/index.vue',
   },
-  {
-    name: 'unAuthorization',
-    path: '/401',
-    component: 'pages/unAuthorization.vue',
-  },
 ];

@@ -19,7 +19,7 @@ export default {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ['~/plugins/axios', '~/plugins/dateTimePicker'],
+  plugins: ['~/plugins/axios', '~/plugins/dateTimePicker', '~/plugins/moment'],
   /*
    ** Nuxt.js dev-modules
    */

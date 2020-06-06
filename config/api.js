@@ -26,6 +26,22 @@ const Authorization = {
 };
 
 export default {
+  getPermisstions() {
+    return {
+      ...Authorization,
+      method: 'GET',
+      url: baseURL + `/getpermision`,
+    };
+  },
+
+  getSoChoNgoiTrenXe() {
+    return {
+      ...Authorization,
+      method: 'GET',
+      url: baseURL + `/User_SelectSoCho`,
+    };
+  },
+
   /**
    *  API tai xe
    */
@@ -112,6 +128,45 @@ export default {
       ...Authorization,
       method: 'POST',
       url: baseURL + `/obj/User_DeleteDangKiXe`,
+      data: { ...dangKy },
+    };
+  },
+
+  /**
+   *  API user quan ly dang ky xe
+   */
+
+  getListTinhTrangDangKy() {
+    return {
+      ...Authorization,
+      method: 'GET',
+      url: baseURL + `/USerQL_SelectTinhTrangDangKi`,
+    };
+  },
+
+  getListDangKyXeByTinhTrang({ dangKy }) {
+    return {
+      ...Authorization,
+      method: 'POST',
+      url: baseURL + `/UserQL_SelectDangKiXe`,
+      data: { ...dangKy },
+    };
+  },
+
+  setTinhTrangDangKy({ dangKy }) {
+    return {
+      ...Authorization,
+      method: 'POST',
+      url: baseURL + `/obj/UserQL_DuyetDangKiXe`,
+      data: { ...dangKy },
+    };
+  },
+
+  setTinhTrangDangKyHanhChanh({ dangKy }) {
+    return {
+      ...Authorization,
+      method: 'POST',
+      url: baseURL + `/obj/Admin_DuyetDangKi`,
       data: { ...dangKy },
     };
   },
