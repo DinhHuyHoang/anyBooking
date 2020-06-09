@@ -1,4 +1,4 @@
-const protocol = 'http';
+const protocol = 'https';
 const host = 'tapi.lhu.edu.vn';
 const port = '';
 const prefix = 'booking';
@@ -21,7 +21,7 @@ function getCookie(cname) {
 
 const Authorization = {
   headers: {
-    Authorization: getCookie('awt'),
+    Authorization: getCookie('awt') || undefined,
   },
 };
 
@@ -30,7 +30,7 @@ export default {
     return {
       ...Authorization,
       method: 'GET',
-      url: baseURL + `/getpermision`,
+      url: baseURL + `/obj/getpermision`,
     };
   },
 
@@ -168,6 +168,18 @@ export default {
       method: 'POST',
       url: baseURL + `/obj/Admin_DuyetDangKi`,
       data: { ...dangKy },
+    };
+  },
+
+  /**
+   *  API Bao cao
+   */
+
+  getReportByDonVi({ donVi }) {
+    return {
+      ...Authorization,
+      method: 'GET',
+      url: baseURL + `/BaoCaoTinhHinhXeDiCongTacTheoDonVi/${donVi}`,
     };
   },
 };

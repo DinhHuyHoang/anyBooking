@@ -10,9 +10,10 @@
         >
           <template v-slot:top>
             <v-toolbar flat color="white">
-              <v-toolbar-title>Tình trạng đăng ký</v-toolbar-title>
+              <v-toolbar-title>Danh sách đăng ký</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
+              <v-btn color="primary" @click="openReport()">Báo cáo</v-btn>
               <v-select
                 v-model="tinhTrang"
                 :items="listTinhTrang"
@@ -37,6 +38,7 @@
                         <v-col>
                           <v-form ref="formCreateOrUpdate">
                             <v-select
+                              v-if="state === '4'"
                               v-model="xe"
                               :items="listXe"
                               item-text="text"
@@ -59,7 +61,13 @@
                             <v-radio-group
                               v-model="state"
                               :rules="[rules.required]"
-                              @change="dangKy['TinhTrang'] = Number(state)"
+                              @change="
+                                () => {
+                                  dangKy['TinhTrang'] = Number(state);
+                                  dangKy['TaiXeID'] = 0;
+                                  dangKy['XeID'] = 0;
+                                }
+                              "
                             >
                               <v-radio label="Không cấp xe" value="3"></v-radio>
                               <v-radio label="Cấp xe" value="4"></v-radio>
@@ -76,9 +84,8 @@
                       color="blue darken-1"
                       dark
                       @click="createOrUpdate(dangKy)"
+                      >Đồng ý</v-btn
                     >
-                      Đồng ý
-                    </v-btn>
                     <v-spacer></v-spacer>
                   </v-card-actions>
                 </v-card>
@@ -87,14 +94,12 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon
-              v-if="item.TinhTrang === 2"
-              small
-              class="mr-2"
-              @click="createOrEditItem({ type: 'edit', data: item })"
-            >
-              mdi-pencil
-            </v-icon>
+            <span @click="createOrEditItem({ type: 'edit', data: item })">
+              <v-icon v-if="item.TinhTrang === 2" small class="mr-2">
+                mdi-pencil
+              </v-icon>
+              <span>Duyệt</span>
+            </span>
           </template>
         </v-data-table>
       </v-col>
@@ -105,6 +110,7 @@
 <script>
 import API from '~/config/api';
 import SnackBar from '~/components/SnackBar';
+import getPdfConfig from '~/config/pdfmake';
 
 export default {
   components: {
@@ -121,6 +127,7 @@ export default {
     headers: [
       { text: 'Thời gian đi', value: 'NgayDi' },
       { text: 'Thời gian về', value: 'NgayVe' },
+      { text: 'Thời gian ĐK', value: 'NgayDK' },
       { text: 'Số chổ', value: 'SoCho' },
       { text: 'Lý do', value: 'LyDoDi' },
       { text: 'Tình trạng', value: 'GhiChuTinhTrang' },
@@ -204,6 +211,25 @@ export default {
         formCreateOrUpdate.reset();
         this.getListDangKyByTinhTrang({ TinhTrang: this.tinhTrang });
       }
+    },
+
+    async openReport() {
+      const { data } = await this.$axios(
+        API.getReportByDonVi({ donVi: 'irc' })
+      );
+
+      // eslint-disable-next-line prefer-const
+      let dataTables = [];
+      let i = 0;
+      for (const row of data) {
+        const { NgayDi, NgayVe, NoiDen, LyDoDi, TenNV } = row;
+        dataTables.push([i, 'irc', NgayDi, NgayVe, NoiDen, LyDoDi, TenNV]);
+        i++;
+      }
+
+      this.$pdfMake
+        .createPdf(getPdfConfig({ donVi: 'Đơn vị test chơi', dataTables }))
+        .open();
     },
   },
 };

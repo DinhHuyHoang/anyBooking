@@ -11,7 +11,7 @@ export default function({ $axios, redirect, store, ...data }) {
     }
 
     if (code === 401) {
-      // redirect('https://app.lhu.edu.vn/');
+      // redirect('https://app.lhu.edu.vn/?ur=booking.lhu.edu.vn/');
       return;
     }
 

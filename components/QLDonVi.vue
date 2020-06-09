@@ -10,7 +10,7 @@
         >
           <template v-slot:top>
             <v-toolbar flat color="white">
-              <v-toolbar-title>Tình trạng đăng ký</v-toolbar-title>
+              <v-toolbar-title>Danh sách đăng ký</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
               <v-select
@@ -37,6 +37,7 @@
                         <v-col>
                           <v-form ref="formCreateOrUpdate">
                             <v-textarea
+                              v-if="Number(state) === 0"
                               v-model="ghiChu"
                               label="Ghi chú"
                               :rules="[rules.required]"
@@ -108,14 +109,12 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon
-              v-if="item.TinhTrang === 1"
-              small
-              class="mr-2"
-              @click="createOrEditItem({ type: 'edit', data: item })"
-            >
-              mdi-pencil
-            </v-icon>
+            <span @click="createOrEditItem({ type: 'edit', data: item })">
+              <v-icon v-if="item.TinhTrang === 1" small class="mr-2">
+                mdi-pencil
+              </v-icon>
+              <span> Duyệt</span>
+            </span>
           </template>
         </v-data-table>
       </v-col>
@@ -142,6 +141,8 @@ export default {
     headers: [
       { text: 'Thời gian đi', value: 'NgayDi' },
       { text: 'Thời gian về', value: 'NgayVe' },
+      { text: 'Thời gian ĐK', value: 'NgayDK' },
+      { text: 'Người ĐK', value: 'NhanVienDK' },
       { text: 'Số chổ', value: 'SoCho' },
       { text: 'Lý do', value: 'LyDoDi' },
       { text: 'Tình trạng', value: 'GhiChuTinhTrang' },

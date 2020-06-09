@@ -19,7 +19,12 @@ export default {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ['~/plugins/axios', '~/plugins/dateTimePicker', '~/plugins/moment'],
+  plugins: [
+    '~/plugins/axios',
+    '~/plugins/dateTimePicker',
+    '~/plugins/moment',
+    '~/plugins/pdfMake',
+  ],
   /*
    ** Nuxt.js dev-modules
    */
@@ -78,7 +83,24 @@ export default {
     /*
      ** You can extend webpack config here
      */
-    extend(config, ctx) {},
+    extend(config, { isClient }) {
+      if (isClient) {
+        config.optimization.splitChunks = {
+          chunks: 'initial',
+          minSize: 10000,
+          maxSize: 20000,
+          cacheGroups: {
+            default: false, // disable the built-in groups, default & vendors (vendors is overwritten below)
+            vendors: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: 10,
+              enforce: true,
+            },
+          },
+        };
+      }
+    },
   },
   router: {
     base: '/',

@@ -3,12 +3,14 @@
     <h1 v-if="error.statusCode === 404">
       {{ pageNotFound }}
     </h1>
-    <h1 v-else>
-      {{ otherError }}
-    </h1>
-    <NuxtLink to="/">
-      Home page
-    </NuxtLink>
+    <div v-else class="text-center">
+      <h1>
+        Xãy ra lỗi vui lòng tải lại trang
+      </h1>
+      <v-btn color="primary" @click="reload()">
+        Tải lại trang
+      </v-btn>
+    </div>
   </v-app>
 </template>
 
@@ -26,6 +28,11 @@ export default {
       pageNotFound: '404 Not Found',
       otherError: 'An error occurred',
     };
+  },
+  methods: {
+    reload() {
+      window.location.reload();
+    },
   },
   head() {
     const title =

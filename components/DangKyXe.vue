@@ -64,7 +64,7 @@
                                 <v-text-field
                                   v-model="soNguoiDi"
                                   label="Số người đi"
-                                  :rules="[rules.required]"
+                                  :rules="[rules.required, rules.number]"
                                   :hint="
                                     soNguoiDi > soCho
                                       ? 'Số người đi lớn hơn số chổ!'
@@ -80,16 +80,13 @@
                                   v-model="dateTimeDepart"
                                   clear-text="Hủy"
                                   label="Thời gian Đi"
+                                  date-format="dd/MM/yyyy"
                                   :text-field-props="{
                                     rules: [rules.required, ruleDate],
                                     'persistent-hint': true,
-                                    hint: 'yyyy-MM-dd HH:mm',
+                                    hint: 'dd/MM/yyyy HH:mm',
                                   }"
-                                  @input="
-                                    dangKy['ThoiGianDi'] = $moment(
-                                      dateTimeDepart
-                                    ).format('YYYY-MM-DD HH:mm')
-                                  "
+                                  @input="dangKy['NgayDi'] = dateTimeDepart"
                                 >
                                 </v-datetime-picker>
                               </v-col>
@@ -98,16 +95,13 @@
                                   v-model="dateTimeArrive"
                                   clear-text="Hủy"
                                   label="Thời gian về"
+                                  date-format="dd/MM/yyyy"
                                   :text-field-props="{
                                     rules: [rules.required, ruleDate],
                                     'persistent-hint': true,
-                                    hint: 'yyyy-MM-dd HH:mm',
+                                    hint: 'dd/MM/yyyy HH:mm',
                                   }"
-                                  @input="
-                                    dangKy['ThoiGianVe'] = $moment(
-                                      dateTimeArrive
-                                    ).format('YYYY-MM-DD HH:mm')
-                                  "
+                                  @input="dangKy['NgayVe'] = dateTimeArrive"
                                 >
                                 </v-datetime-picker>
                               </v-col>
@@ -121,6 +115,11 @@
                                     rules.required,
                                     rules.maxLength.bind(null, 300),
                                   ]"
+                                  persistent-hint
+                                  :hint="
+                                    ((placeDepart && placeDepart.length) ||
+                                      '0') + '/300'
+                                  "
                                   @input="dangKy['DiemKhoiHanh'] = placeDepart"
                                 ></v-textarea>
                               </v-col>
@@ -132,6 +131,11 @@
                                     rules.required,
                                     rules.maxLength.bind(null, 300),
                                   ]"
+                                  persistent-hint
+                                  :hint="
+                                    ((placeArrive && placeArrive.length) ||
+                                      '0') + '/300'
+                                  "
                                   @input="dangKy['NoiDen'] = placeArrive"
                                 ></v-textarea>
                               </v-col>
@@ -143,6 +147,10 @@
                                 rules.required,
                                 rules.maxLength.bind(null, 300),
                               ]"
+                              persistent-hint
+                              :hint="
+                                ((reason && reason.length) || '0') + '/300'
+                              "
                               @input="dangKy['LyDoDi'] = reason"
                             ></v-textarea>
                           </v-form>
@@ -167,11 +175,13 @@
 
               <v-dialog v-model="dialogRemove" max-width="500px">
                 <v-card v-if="Object.keys(dangKy).length">
-                  <v-card-title class="pa-0">
-                    <v-alert width="100%" type="error">
-                      <span class="headline">{{ dangKy.formTitle }}</span>
-                    </v-alert>
-                  </v-card-title>
+                  <v-toolbar dark color="error">
+                    <v-btn icon dark @click="dialogRemove = false">
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                    <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                  </v-toolbar>
 
                   <v-card-text>
                     <v-container>
@@ -185,16 +195,8 @@
 
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="remove(dangKy)">
+                    <v-btn color="red darken-1" text @click="remove(dangKy)">
                       Đồng ý
-                    </v-btn>
-                    <v-btn
-                      dark=""
-                      color="red darken-1"
-                      text
-                      @click="dialogRemove = false"
-                    >
-                      Đóng
                     </v-btn>
                   </v-card-actions>
                 </v-card>
@@ -234,12 +236,14 @@ export default {
     dialogRemove: false,
     rules: {
       required: value => !!value || 'Không được bỏ trống trường này',
+      number: value => /\D/gi.test(value) === false || 'Phải nhập ký tự số',
       maxLength: (max, value = '') =>
         (value && value.length <= max) || `Không được quá ${max} ký tự`,
     },
     headers: [
       { text: 'Thời gian đi', value: 'NgayDi' },
       { text: 'Thời gian về', value: 'NgayVe' },
+      { text: 'Thời gian ĐK', value: 'NgayDK' },
       { text: 'Số chổ', value: 'SoCho' },
       { text: 'Lý do', value: 'LyDoDi' },
       { text: 'Tình trạng', value: 'GhiChuTinhTrang' },
@@ -247,9 +251,9 @@ export default {
       { text: '', value: 'actions', sortable: false },
     ],
     listDangKy: [],
-    dateTimeDepart: null,
+    dateTimeDepart: undefined,
     placeDepart: null,
-    dateTimeArrive: null,
+    dateTimeArrive: undefined,
     placeArrive: null,
     reason: null,
     soCho: null,
@@ -263,18 +267,30 @@ export default {
       const ngayDi = new Date(this.dateTimeDepart);
       const ngayDen = new Date(this.dateTimeArrive);
 
-      if (ngayDi.getTime() < today.getTime()) return 'Ngày không hợp lệ';
-      if (ngayDi.getDay() === 0) return 'Không thể đặt xe vào chủ nhật';
+      if (Boolean(ngayDi.getTime()) === false) return 'Chưa chọn ngày đi';
+      if (Boolean(ngayDen.getTime()) === false) return 'Chưa chọn ngày về';
+
+      if (ngayDi.getTime() < today.getTime()) return 'Ngày đi không hợp lệ';
+      // if (ngayDi.getDay() === 0) return 'Không thể đặt xe vào chủ nhật';
 
       return ngayDi.getTime() < ngayDen.getTime() || 'Thời gian không hợp lệ';
     },
   },
+
   created() {
     this.getListDangKy();
     this.getListSoChoNgoi();
   },
 
   methods: {
+    pasreDate(dateString) {
+      const { $moment } = this;
+      const date = $moment(dateString, 'DD/MM/YYYY HH:mm').format(
+        'YYYY/MM/DD HH:mm'
+      );
+      return new Date(date);
+    },
+
     async getListSoChoNgoi() {
       const { data } = await this.$axios(API.getSoChoNgoiTrenXe());
       this.listSoChoNgoi = data;
@@ -287,10 +303,29 @@ export default {
 
     createOrEditItem({ type, data = {} }) {
       const dangKy = {
-        formTitle: type === 'create' ? 'Thêm xe' : 'Sửa xe',
+        formTitle: type === 'create' ? 'Đăng ký xe' : 'Sửa đăng ký xe',
         MaDK: type === 'create' ? 0 : undefined,
         ...data,
       };
+
+      if (type === 'edit') {
+        const {
+          SoCho,
+          SoNguoiDi,
+          NgayDi,
+          DiemKhoiHanh,
+          NgayVe,
+          NoiDen,
+          LyDoDi,
+        } = data;
+        this.soCho = SoCho;
+        this.soNguoiDi = SoNguoiDi;
+        this.dateTimeDepart = this.pasreDate(NgayDi);
+        this.placeDepart = DiemKhoiHanh;
+        this.dateTimeArrive = this.pasreDate(NgayVe);
+        this.placeArrive = NoiDen;
+        this.reason = LyDoDi;
+      }
 
       this.dangKy = dangKy;
       this.dialogCreateOrUpdate = true;

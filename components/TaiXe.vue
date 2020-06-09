@@ -30,11 +30,13 @@
                   </v-btn>
                 </template>
                 <v-card v-if="Object.keys(taiXe).length">
-                  <v-card-title class="pa-0">
-                    <v-alert width="100%" type="info">
-                      <span class="headline">{{ taiXe.formTitle }}</span>
-                    </v-alert>
-                  </v-card-title>
+                  <v-toolbar dark color="primary">
+                    <v-btn icon dark @click="dialogCreateOrUpdate = false">
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                    <v-toolbar-title>{{ taiXe.formTitle }}</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                  </v-toolbar>
 
                   <v-card-text>
                     <v-container>
@@ -66,24 +68,19 @@
                     >
                       Đồng ý
                     </v-btn>
-                    <v-btn
-                      color="red darken-1"
-                      text
-                      @click="dialogCreateOrUpdate = false"
-                    >
-                      Đóng
-                    </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
 
               <v-dialog v-model="dialogRemove" max-width="500px">
                 <v-card v-if="Object.keys(taiXe).length">
-                  <v-card-title class="pa-0">
-                    <v-alert width="100%" type="error">
-                      <span class="headline">{{ taiXe.formTitle }}</span>
-                    </v-alert>
-                  </v-card-title>
+                  <v-toolbar dark color="error">
+                    <v-btn icon dark @click="dialogRemove = false">
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                    <v-toolbar-title>{{ taiXe.formTitle }}</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                  </v-toolbar>
 
                   <v-card-text>
                     <v-container>
@@ -97,15 +94,8 @@
 
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="remove(taiXe)">
+                    <v-btn color="red darken-1" text @click="remove(taiXe)">
                       Đồng ý
-                    </v-btn>
-                    <v-btn
-                      color="red darken-1"
-                      text
-                      @click="dialogRemove = false"
-                    >
-                      Đóng
                     </v-btn>
                   </v-card-actions>
                 </v-card>
