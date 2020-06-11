@@ -1,30 +1,48 @@
 <template>
-  <v-container>
-    <v-row v-if="rights.length === 0">
-      <v-col>
-        <div class="text-center">
-          <h1>Bạn chưa được cấp quyền!</h1>
-        </div>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col v-if="checkRight(userRight.phongHanhChanh)" cols="12" sm="6">
-        <TaiXeComp />
-      </v-col>
-      <v-col v-if="checkRight(userRight.phongHanhChanh)" cols="12" sm="6">
-        <XeComp />
-      </v-col>
-      <v-col v-if="checkRight(userRight.nhanVien)" cols="12">
-        <DangKyXeComp />
-      </v-col>
-      <v-col v-if="checkRight(userRight.truongPhong)" cols="12">
-        <QLDonViComp />
-      </v-col>
-      <v-col v-if="checkRight(userRight.phongHanhChanh)" cols="12">
-        <HanhChanhComp />
-      </v-col>
-    </v-row>
-  </v-container>
+  <div>
+    <v-app-bar color="primary accent-4" dense dark>
+      <v-toolbar-title>Đăng ký xe</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn
+        v-if="checkRight(userRight.phongHanhChanh)"
+        text
+        @click="toggleDialogReport()"
+      >
+        Báo cáo
+      </v-btn>
+    </v-app-bar>
+    <v-container>
+      <v-row v-if="rights.length === 0">
+        <v-col>
+          <div class="text-center">
+            <h1>Bạn chưa được cấp quyền!</h1>
+          </div>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col v-if="checkRight(userRight.phongHanhChanh)" cols="12" sm="6">
+          <TaiXeComp />
+        </v-col>
+        <v-col v-if="checkRight(userRight.phongHanhChanh)" cols="12" sm="6">
+          <XeComp />
+        </v-col>
+        <v-col v-if="checkRight(userRight.nhanVien)" cols="12">
+          <DangKyXeComp />
+        </v-col>
+        <v-col v-if="checkRight(userRight.truongPhong)" cols="12">
+          <QLDonViComp />
+        </v-col>
+        <v-col v-if="checkRight(userRight.phongHanhChanh)" cols="12">
+          <HanhChanhComp />
+        </v-col>
+      </v-row>
+    </v-container>
+    <BaoCaoComp
+      v-if="checkRight(userRight.phongHanhChanh)"
+      :is-open="isOpenReport"
+      :toggle-dialog="toggleDialogReport"
+    />
+  </div>
 </template>
 
 <script>
@@ -33,6 +51,7 @@ import XeComp from '~/components/Xe';
 import DangKyXeComp from '~/components/DangKyXe';
 import QLDonViComp from '~/components/QLDonVi';
 import HanhChanhComp from '~/components/HanhChanh';
+import BaoCaoComp from '~/components/BaoCao';
 import API from '~/config/api';
 
 function getFunctionRight({ rights = '[0]' }) {
@@ -51,6 +70,7 @@ export default {
     DangKyXeComp,
     QLDonViComp,
     HanhChanhComp,
+    BaoCaoComp,
   },
 
   async asyncData({ $axios }) {
@@ -60,6 +80,7 @@ export default {
   },
 
   data: () => ({
+    isOpenReport: false,
     userRight: {
       nhanVien: '1',
       truongPhong: '2',
@@ -70,6 +91,10 @@ export default {
   methods: {
     checkRight(expectRight = 0) {
       return this.rights.includes(expectRight);
+    },
+
+    toggleDialogReport() {
+      this.isOpenReport = !this.isOpenReport;
     },
   },
 };

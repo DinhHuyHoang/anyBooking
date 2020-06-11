@@ -136,19 +136,27 @@ export default {
    *  API user quan ly dang ky xe
    */
 
-  getListTinhTrangDangKy() {
+  getListTinhTrangDangKy({ typeUser = 'admin' }) {
     return {
       ...Authorization,
       method: 'GET',
-      url: baseURL + `/USerQL_SelectTinhTrangDangKi`,
+      url:
+        baseURL +
+        (typeUser === 'admin'
+          ? '/Admin_SelectTinhTrangDangKi'
+          : '/USerQL_SelectTinhTrangDangKi'),
     };
   },
 
-  getListDangKyXeByTinhTrang({ dangKy }) {
+  getListDangKyXeByTinhTrang({ dangKy, typeUser = 'admin' }) {
     return {
       ...Authorization,
       method: 'POST',
-      url: baseURL + `/UserQL_SelectDangKiXe`,
+      url:
+        baseURL +
+        (typeUser === 'admin'
+          ? '/Admin_SelectDangKi'
+          : '/UserQL_SelectDangKiXe'),
       data: { ...dangKy },
     };
   },
@@ -174,12 +182,27 @@ export default {
   /**
    *  API Bao cao
    */
+  getListDonVi() {
+    return {
+      ...Authorization,
+      method: 'GET',
+      url: baseURL + `/DonViSelect/`,
+    };
+  },
 
   getReportByDonVi({ donVi }) {
     return {
       ...Authorization,
       method: 'GET',
       url: baseURL + `/BaoCaoTinhHinhXeDiCongTacTheoDonVi/${donVi}`,
+    };
+  },
+
+  getReportThang({ month, year }) {
+    return {
+      ...Authorization,
+      method: 'GET',
+      url: baseURL + `/BaoCaoTinhHinhXeDiCongTacTheoThang/${month}/${year}`,
     };
   },
 };

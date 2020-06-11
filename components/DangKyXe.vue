@@ -6,7 +6,7 @@
           :headers="headers"
           :items="listDangKy"
           :items-per-page="5"
-          class="elevation-1"
+          class="elevation-0"
         >
           <template v-slot:top>
             <v-toolbar flat color="white">
@@ -50,26 +50,10 @@
                           <v-form ref="formCreateOrUpdate">
                             <v-row>
                               <v-col>
-                                <v-select
-                                  v-model="soCho"
-                                  :items="listSoChoNgoi"
-                                  item-text="LoaiXe"
-                                  item-value="SoCho"
-                                  label="Số chổ"
-                                  :rules="[rules.required]"
-                                  @input="dangKy['SoCho'] = soCho"
-                                ></v-select>
-                              </v-col>
-                              <v-col>
                                 <v-text-field
                                   v-model="soNguoiDi"
                                   label="Số người đi"
                                   :rules="[rules.required, rules.number]"
-                                  :hint="
-                                    soNguoiDi > soCho
-                                      ? 'Số người đi lớn hơn số chổ!'
-                                      : ''
-                                  "
                                   @input="dangKy['SoNguoiDi'] = soNguoiDi"
                                 ></v-text-field>
                               </v-col>
@@ -108,20 +92,44 @@
                             </v-row>
                             <v-row>
                               <v-col>
-                                <v-textarea
-                                  v-model="placeDepart"
-                                  label="Địa điểm khởi hành"
-                                  :rules="[
-                                    rules.required,
-                                    rules.maxLength.bind(null, 300),
-                                  ]"
-                                  persistent-hint
-                                  :hint="
-                                    ((placeDepart && placeDepart.length) ||
-                                      '0') + '/300'
-                                  "
-                                  @input="dangKy['DiemKhoiHanh'] = placeDepart"
-                                ></v-textarea>
+                                <v-row no-gutters="">
+                                  <v-col cols="12">
+                                    <v-textarea
+                                      v-model="placeDepart"
+                                      label="Địa điểm khởi hành"
+                                      :rules="[
+                                        rules.required,
+                                        rules.maxLength.bind(null, 300),
+                                      ]"
+                                      persistent-hint
+                                      :hint="
+                                        ((placeDepart && placeDepart.length) ||
+                                          '0') + '/300'
+                                      "
+                                      @input="
+                                        dangKy['DiemKhoiHanh'] = placeDepart
+                                      "
+                                    ></v-textarea>
+                                  </v-col>
+                                  <v-col cols="12">
+                                    <v-radio-group
+                                      v-model="radioCampus"
+                                      row
+                                      @change="
+                                        campus => {
+                                          placeDepart = `${campus} Đại học Lạc Hồng`;
+                                        }
+                                      "
+                                    >
+                                      <v-radio
+                                        v-for="(campus, index) in listCampuses"
+                                        :key="index"
+                                        :label="campus"
+                                        :value="campus"
+                                      ></v-radio>
+                                    </v-radio-group>
+                                  </v-col>
+                                </v-row>
                               </v-col>
                               <v-col>
                                 <v-textarea
@@ -231,36 +239,45 @@ export default {
   components: {
     SnackBar,
   },
-  data: () => ({
-    dialogCreateOrUpdate: false,
-    dialogRemove: false,
-    rules: {
-      required: value => !!value || 'Không được bỏ trống trường này',
-      number: value => /\D/gi.test(value) === false || 'Phải nhập ký tự số',
-      maxLength: (max, value = '') =>
-        (value && value.length <= max) || `Không được quá ${max} ký tự`,
-    },
-    headers: [
-      { text: 'Thời gian đi', value: 'NgayDi' },
-      { text: 'Thời gian về', value: 'NgayVe' },
-      { text: 'Thời gian ĐK', value: 'NgayDK' },
-      { text: 'Số chổ', value: 'SoCho' },
-      { text: 'Lý do', value: 'LyDoDi' },
-      { text: 'Tình trạng', value: 'GhiChuTinhTrang' },
-      { text: 'Ghi chú', value: 'GhiChu' },
-      { text: '', value: 'actions', sortable: false },
-    ],
-    listDangKy: [],
-    dateTimeDepart: undefined,
-    placeDepart: null,
-    dateTimeArrive: undefined,
-    placeArrive: null,
-    reason: null,
-    soCho: null,
-    soNguoiDi: null,
-    dangKy: {},
-    listSoChoNgoi: [],
-  }),
+  data(vm) {
+    return {
+      dialogCreateOrUpdate: false,
+      dialogRemove: false,
+      rules: {
+        required: value => !!value || 'Không được bỏ trống trường này',
+        number: value => /\D/gi.test(value) === false || 'Phải nhập ký tự số',
+        maxLength: (max, value = '') =>
+          (value && value.length <= max) || `Không được quá ${max} ký tự`,
+      },
+      headers: [
+        { text: 'Thời gian đi', value: 'NgayDi' },
+        { text: 'Thời gian về', value: 'NgayVe' },
+        { text: 'Thời gian ĐK', value: 'NgayDK' },
+        { text: 'Lý do', value: 'LyDoDi' },
+        { text: 'Tình trạng', value: 'GhiChuTinhTrang' },
+        { text: 'Ghi chú', value: 'GhiChu' },
+        { text: '', value: 'actions', sortable: false },
+      ],
+      listDangKy: [],
+      radioCampus: 'Cở sở 1',
+      listCampuses: [
+        'Cở sở 1',
+        'Cở sở 2',
+        'Cở sở 3',
+        'Cở sở 4',
+        'Cở sở 5',
+        'Cở sở 6',
+        'Cở sở Dược',
+      ],
+      dateTimeDepart: undefined,
+      placeDepart: null,
+      dateTimeArrive: undefined,
+      placeArrive: null,
+      reason: null,
+      soNguoiDi: null,
+      dangKy: {},
+    };
+  },
   computed: {
     ruleDate() {
       const today = new Date();
@@ -269,9 +286,7 @@ export default {
 
       if (Boolean(ngayDi.getTime()) === false) return 'Chưa chọn ngày đi';
       if (Boolean(ngayDen.getTime()) === false) return 'Chưa chọn ngày về';
-
       if (ngayDi.getTime() < today.getTime()) return 'Ngày đi không hợp lệ';
-      // if (ngayDi.getDay() === 0) return 'Không thể đặt xe vào chủ nhật';
 
       return ngayDi.getTime() < ngayDen.getTime() || 'Thời gian không hợp lệ';
     },
@@ -279,10 +294,21 @@ export default {
 
   created() {
     this.getListDangKy();
-    this.getListSoChoNgoi();
+    this.initialize();
   },
 
   methods: {
+    initialize() {
+      this.radioCampus = 'Cở sở 1';
+      this.placeDepart = `${this.radioCampus} Đại học Lạc Hồng`;
+      this.dateTimeDepart = undefined;
+      this.dateTimeArrive = undefined;
+      this.placeArrive = null;
+      this.reason = null;
+      this.soNguoiDi = null;
+      this.dangKy.DiemKhoiHanh = this.placeDepart;
+    },
+
     pasreDate(dateString) {
       const { $moment } = this;
       const date = $moment(dateString, 'DD/MM/YYYY HH:mm').format(
@@ -291,26 +317,23 @@ export default {
       return new Date(date);
     },
 
-    async getListSoChoNgoi() {
-      const { data } = await this.$axios(API.getSoChoNgoiTrenXe());
-      this.listSoChoNgoi = data;
-    },
-
     async getListDangKy() {
       const { data } = await this.$axios(API.getListDangKyXe());
       this.listDangKy = data;
     },
 
     createOrEditItem({ type, data = {} }) {
+      this.initialize();
+
       const dangKy = {
         formTitle: type === 'create' ? 'Đăng ký xe' : 'Sửa đăng ký xe',
         MaDK: type === 'create' ? 0 : undefined,
         ...data,
+        ...this.dangKy,
       };
 
       if (type === 'edit') {
         const {
-          SoCho,
           SoNguoiDi,
           NgayDi,
           DiemKhoiHanh,
@@ -318,7 +341,6 @@ export default {
           NoiDen,
           LyDoDi,
         } = data;
-        this.soCho = SoCho;
         this.soNguoiDi = SoNguoiDi;
         this.dateTimeDepart = this.pasreDate(NgayDi);
         this.placeDepart = DiemKhoiHanh;
@@ -363,8 +385,8 @@ export default {
           timeout: 1000,
           message,
         });
+        // formCreateOrUpdate.reset();
         this.dialogCreateOrUpdate = false;
-        formCreateOrUpdate.reset();
         this.getListDangKy();
       }
     },

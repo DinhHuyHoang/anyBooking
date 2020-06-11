@@ -6,7 +6,7 @@
           :headers="headers"
           :items="listDangKy"
           :items-per-page="5"
-          class="elevation-1"
+          class="elevation-0"
         >
           <template v-slot:top>
             <v-toolbar flat color="white">
@@ -19,7 +19,6 @@
                 item-text="GhiChu"
                 item-value="TinhTrang"
                 label="Tình trạng"
-                @input="dangKy['TinhTrang'] = tinhTrang"
               ></v-select>
               <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
                 <v-card v-if="Object.keys(dangKy).length">
@@ -37,7 +36,7 @@
                         <v-col>
                           <v-form ref="formCreateOrUpdate">
                             <v-textarea
-                              v-if="Number(state) === 0"
+                              v-if="state == 0"
                               v-model="ghiChu"
                               label="Ghi chú"
                               :rules="[rules.required]"
@@ -46,7 +45,11 @@
                             <v-radio-group
                               v-model="state"
                               :rules="[rules.required]"
-                              @change="dangKy['TinhTrang'] = Number(state)"
+                              @change="
+                                value => {
+                                  dangKy['TinhTrang'] = Number(value);
+                                }
+                              "
                             >
                               <v-radio label="Không duyệt" value="0"></v-radio>
                               <v-radio label="Duyệt" value="2"></v-radio>
@@ -70,47 +73,15 @@
                   </v-card-actions>
                 </v-card>
               </v-dialog>
-
-              <v-dialog v-model="dialogRemove" max-width="500px">
-                <v-card v-if="Object.keys(dangKy).length">
-                  <v-card-title class="pa-0">
-                    <v-alert width="100%" type="error">
-                      <span class="headline">{{ dangKy.formTitle }}</span>
-                    </v-alert>
-                  </v-card-title>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col>
-                          <div>{{ dangKy.message }}</div>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="remove(dangKy)">
-                      Đồng ý
-                    </v-btn>
-                    <v-btn
-                      dark=""
-                      color="red darken-1"
-                      text
-                      @click="dialogRemove = false"
-                    >
-                      Đóng
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
             </v-toolbar>
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <span @click="createOrEditItem({ type: 'edit', data: item })">
-              <v-icon v-if="item.TinhTrang === 1" small class="mr-2">
+            <span
+              v-if="item.TinhTrang === 1"
+              @click="createOrEditItem({ type: 'edit', data: item })"
+            >
+              <v-icon small class="mr-2">
                 mdi-pencil
               </v-icon>
               <span> Duyệt</span>
@@ -143,38 +114,43 @@ export default {
       { text: 'Thời gian về', value: 'NgayVe' },
       { text: 'Thời gian ĐK', value: 'NgayDK' },
       { text: 'Người ĐK', value: 'NhanVienDK' },
-      { text: 'Số chổ', value: 'SoCho' },
+      { text: 'Khởi hành', value: 'DiemKhoiHanh' },
+      { text: 'Nơi đến', value: 'NoiDen' },
       { text: 'Lý do', value: 'LyDoDi' },
-      { text: 'Tình trạng', value: 'GhiChuTinhTrang' },
       { text: '', value: 'actions', sortable: false },
     ],
     listDangKy: [],
     listTinhTrang: [],
-    tinhTrang: null,
+    tinhTrang: -1,
     ghiChu: null,
-    state: null,
-    dangKy: {},
+    state: '2',
+    dangKy: {
+      TinhTrang: 2,
+    },
   }),
 
   watch: {
     tinhTrang(newVal) {
-      this.getListDangKyByTinhTrang(this.dangKy);
+      this.getListDangKyByTinhTrang({ TinhTrang: newVal });
     },
   },
 
   created() {
     this.getListTinhTrang();
+    this.getListDangKyByTinhTrang({ TinhTrang: this.tinhTrang });
   },
 
   methods: {
     async getListTinhTrang() {
-      const { data } = await this.$axios(API.getListTinhTrangDangKy());
+      const { data } = await this.$axios(
+        API.getListTinhTrangDangKy({ typeUser: 'quanLyDonVi' })
+      );
       this.listTinhTrang = data;
     },
 
     async getListDangKyByTinhTrang(dangKy) {
       const { data } = await this.$axios(
-        API.getListDangKyXeByTinhTrang({ dangKy })
+        API.getListDangKyXeByTinhTrang({ dangKy, typeUser: 'quanLyDonVi' })
       );
       this.listDangKy = data;
     },
@@ -184,9 +160,11 @@ export default {
         formTitle: type === 'create' ? 'Duyệt đăng ký' : 'Duyệt đăng ký',
         MaDK: type === 'create' ? 0 : undefined,
         ...data,
+        TinhTrang: 2,
       };
 
       this.dangKy = dangKy;
+      this.state = '2';
       this.dialogCreateOrUpdate = true;
     },
 
@@ -209,8 +187,8 @@ export default {
           timeout: 1000,
           message,
         });
-        this.dialogCreateOrUpdate = false;
         formCreateOrUpdate.reset();
+        this.dialogCreateOrUpdate = false;
         this.getListDangKyByTinhTrang({ TinhTrang: this.tinhTrang });
       }
     },

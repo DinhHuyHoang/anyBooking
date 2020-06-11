@@ -6,21 +6,19 @@
           :headers="headers"
           :items="listDangKy"
           :items-per-page="5"
-          class="elevation-1"
+          class="elevation-0"
         >
           <template v-slot:top>
             <v-toolbar flat color="white">
               <v-toolbar-title>Danh sách đăng ký</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
-              <v-btn color="primary" @click="openReport()">Báo cáo</v-btn>
               <v-select
                 v-model="tinhTrang"
                 :items="listTinhTrang"
                 item-text="GhiChu"
                 item-value="TinhTrang"
                 label="Tình trạng"
-                @input="dangKy['TinhTrang'] = tinhTrang"
               ></v-select>
               <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
                 <v-card v-if="Object.keys(dangKy).length">
@@ -43,19 +41,32 @@
                               :items="listXe"
                               item-text="text"
                               return-object
-                              label="Số chổ"
+                              label="Xe"
                               :rules="[rules.required]"
                               @change="
                                 () => {
-                                  dangKy['TaiXeID'] = xe.TaiXeID;
                                   dangKy['XeID'] = xe.XeID;
+                                }
+                              "
+                            ></v-select>
+                            <v-select
+                              v-if="state === '4'"
+                              v-model="taiXe"
+                              :items="listTaiXe"
+                              item-text="HoTenTX"
+                              return-object
+                              label="Tài xế"
+                              :rules="[rules.required]"
+                              @change="
+                                () => {
+                                  dangKy['TaiXeID'] = taiXe.TaiXeID;
                                 }
                               "
                             ></v-select>
                             <v-textarea
                               v-model="ghiChu"
                               label="Ghi chú"
-                              :rules="[rules.required]"
+                              :rules="[state == 4 ? true : rules.required]"
                               @input="dangKy['GhiChu'] = ghiChu"
                             ></v-textarea>
                             <v-radio-group
@@ -94,8 +105,11 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <span @click="createOrEditItem({ type: 'edit', data: item })">
-              <v-icon v-if="item.TinhTrang === 2" small class="mr-2">
+            <span
+              v-if="item.TinhTrang === 2"
+              @click="createOrEditItem({ type: 'edit', data: item })"
+            >
+              <v-icon small class="mr-2">
                 mdi-pencil
               </v-icon>
               <span>Duyệt</span>
@@ -125,52 +139,80 @@ export default {
         (value && value.length <= max) || `Không được quá ${max} ký tự`,
     },
     headers: [
+      { text: 'Phòng ban', value: 'PhongBanDK' },
       { text: 'Thời gian đi', value: 'NgayDi' },
       { text: 'Thời gian về', value: 'NgayVe' },
       { text: 'Thời gian ĐK', value: 'NgayDK' },
-      { text: 'Số chổ', value: 'SoCho' },
+      { text: 'Khởi hành', value: 'DiemKhoiHanh' },
+      { text: 'Nơi đến', value: 'NoiDen' },
       { text: 'Lý do', value: 'LyDoDi' },
-      { text: 'Tình trạng', value: 'GhiChuTinhTrang' },
       { text: '', value: 'actions', sortable: false },
     ],
     listDangKy: [],
     listTinhTrang: [],
-    tinhTrang: null,
+    tinhTrang: 2,
     ghiChu: null,
-    state: null,
+    state: '4',
     listXe: [],
+    listTaiXe: [],
+    taiXe: null,
     xe: null,
-    dangKy: {},
+    dangKy: {
+      TinhTrang: 4,
+    },
   }),
 
   watch: {
     tinhTrang(newVal) {
-      this.getListDangKyByTinhTrang(this.dangKy);
+      this.getListDangKyByTinhTrang({ TinhTrang: this.tinhTrang });
+    },
+    xe(newVal) {
+      if (!newVal) return;
+      this.taiXe = this.listTaiXe.find(
+        taiXe => taiXe.TaiXeID === newVal?.TaiXeID
+      );
+      this.dangKy.TaiXeID = this.taiXe.TaiXeID;
     },
   },
 
   created() {
     this.getListTinhTrang();
+    this.getListDangKyByTinhTrang({ TinhTrang: this.tinhTrang });
     this.getListXe();
+    this.getListTaiXe();
   },
 
   methods: {
+    initialize() {
+      this.state = '4';
+      this.ghiChu = null;
+      this.taiXe = null;
+      this.xe = null;
+    },
+
     async getListXe() {
       const { data } = await this.$axios(API.getListXe());
       data.map(item => {
-        item.text = `Tài xế: ${item.HoTenTX} - số chổ: ${item.SoCho}`;
+        item.text = `Biển số: ${item.BienSo} - số chổ: ${item.SoCho}`;
       });
       this.listXe = data;
     },
 
+    async getListTaiXe() {
+      const { data } = await this.$axios(API.getListTaiXe());
+      this.listTaiXe = data;
+    },
+
     async getListTinhTrang() {
-      const { data } = await this.$axios(API.getListTinhTrangDangKy());
+      const { data } = await this.$axios(
+        API.getListTinhTrangDangKy({ typeUser: 'admin' })
+      );
       this.listTinhTrang = data;
     },
 
     async getListDangKyByTinhTrang(dangKy) {
       const { data } = await this.$axios(
-        API.getListDangKyXeByTinhTrang({ dangKy })
+        API.getListDangKyXeByTinhTrang({ dangKy, typeUser: 'admin' })
       );
       this.listDangKy = data;
     },
@@ -180,8 +222,9 @@ export default {
         formTitle: type === 'create' ? 'Duyệt đăng ký' : 'Duyệt đăng ký',
         MaDK: type === 'create' ? 0 : undefined,
         ...data,
+        TinhTrang: 4,
       };
-
+      this.initialize();
       this.dangKy = dangKy;
       this.dialogCreateOrUpdate = true;
     },

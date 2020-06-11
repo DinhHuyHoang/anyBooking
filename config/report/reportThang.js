@@ -1,5 +1,6 @@
 export default ({
-  donVi = '',
+  month = '',
+  year = '',
   dataTables = [
     ['1', '2', '3', '4', '5', '6', '7'],
     ['1', '2', '3', '4', '5', '6', '7'],
@@ -66,7 +67,7 @@ export default ({
       margin: [0, 32, 0, 0],
       bold: true,
       fontSize: 16,
-      text: `BÁO CÁO \n Tình hình đơn vị ${donVi} đăng ký xe đi công tác trong thời gian qua.`,
+      text: `BÁO CÁO \n Tình hình xe đi công tác tháng ${month}/${year}`,
     },
     {
       canvas: [
@@ -83,7 +84,7 @@ export default ({
     {
       alignment: 'center',
       margin: [0, 32, 0, 16],
-      text: `Trong thời gian qua, đơn vị ${donVi} đã đăng ký xe đi công tác như sau:`,
+      text: `Trong tháng ${month}/${year}, tình hình các đơn vị đã đăng ký xe đi công tác như sau`,
     },
     {
       table: {
@@ -105,7 +106,7 @@ export default ({
     },
     {
       margin: [32, 16, 0, 0],
-      text: `\u200B\t\u200B\tTrên đây là báo cáo tình hình đơn vị ${donVi} đã đăng ký xe đi công tác trong thời gian qua ./.`,
+      text: `\u200B\t\u200B\tTrên đây là báo cáo tình hình các đơn vị đã đăng ký xe đi công tác tháng ${month}/${year} ./.`,
     },
     {
       margin: [32, 32, 0, 0],
