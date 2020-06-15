@@ -13,104 +13,18 @@
               <v-toolbar-title>Xe</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
-              <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    color="primary"
-                    small
-                    dark
-                    class="mb-2"
-                    v-on="on"
-                    @click="createOrEditItem({ type: 'create' })"
-                  >
-                    <v-icon small class="mr-2">
-                      mdi-plus
-                    </v-icon>
-                    <span>Thêm</span>
-                  </v-btn>
-                </template>
-                <v-card v-if="Object.keys(xe).length">
-                  <v-toolbar dark color="primary">
-                    <v-btn icon dark @click="dialogCreateOrUpdate = false">
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <v-toolbar-title>{{ xe.formTitle }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                  </v-toolbar>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col>
-                          <v-form ref="formCreateOrUpdate">
-                            <v-text-field
-                              v-model="xe.BienSo"
-                              label="Biển số xe"
-                              :rules="[rules.required]"
-                            ></v-text-field>
-                            <v-select
-                              v-model="xe.SoCho"
-                              :items="listSoChoNgoi"
-                              item-text="LoaiXe"
-                              item-value="SoCho"
-                              label="Số chổ"
-                              :rules="[rules.required]"
-                            ></v-select>
-                            <v-select
-                              v-model="taiXeId"
-                              :items="listTaiXe"
-                              item-text="HoTenTX"
-                              item-value="TaiXeID"
-                              label="Tài xế"
-                              :rules="[rules.required]"
-                            ></v-select>
-                          </v-form>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="blue darken-1"
-                      text
-                      @click="createOrUpdate(xe)"
-                    >
-                      Đồng ý
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-
-              <v-dialog v-model="dialogRemove" max-width="500px">
-                <v-card v-if="Object.keys(xe).length">
-                  <v-toolbar dark color="error">
-                    <v-btn icon dark @click="dialogRemove = false">
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <v-toolbar-title>{{ xe.formTitle }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                  </v-toolbar>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col>
-                          <div>{{ xe.message }}</div>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="red darken-1" text @click="remove(xe)">
-                      Đồng ý
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
+              <v-btn
+                color="primary"
+                small
+                dark
+                class="mb-2"
+                @click="createOrEditItem({ type: 'create' })"
+              >
+                <v-icon small class="mr-2">
+                  mdi-plus
+                </v-icon>
+                <span>Thêm</span>
+              </v-btn>
             </v-toolbar>
           </template>
 
@@ -127,6 +41,86 @@
             </v-icon>
           </template>
         </v-data-table>
+
+        <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
+          <v-card v-if="Object.keys(xe).length">
+            <v-toolbar dark color="primary">
+              <v-btn icon dark @click="dialogCreateOrUpdate = false">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+              <v-toolbar-title>{{ xe.formTitle }}</v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col>
+                    <v-form ref="formCreateOrUpdate">
+                      <v-text-field
+                        v-model="xe.BienSo"
+                        label="Biển số xe"
+                        :rules="[rules.required]"
+                      ></v-text-field>
+                      <v-select
+                        v-model="xe.SoCho"
+                        :items="listSoChoNgoi"
+                        item-text="LoaiXe"
+                        item-value="SoCho"
+                        label="Số chổ"
+                        :rules="[rules.required]"
+                      ></v-select>
+                      <v-select
+                        v-model="taiXeId"
+                        :items="listTaiXe"
+                        item-text="HoTenTX"
+                        item-value="TaiXeID"
+                        label="Tài xế"
+                        :rules="[rules.required]"
+                      ></v-select>
+                    </v-form>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="createOrUpdate(xe)">
+                Đồng ý
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="dialogRemove" max-width="500px">
+          <v-card v-if="Object.keys(xe).length">
+            <v-toolbar dark color="error">
+              <v-btn icon dark @click="dialogRemove = false">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+              <v-toolbar-title>{{ xe.formTitle }}</v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col>
+                    <div>{{ xe.message }}</div>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="red darken-1" text @click="remove(xe)">
+                Đồng ý
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
     </v-row>
     <SnackBar ref="SnackBar" />

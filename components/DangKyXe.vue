@@ -1,233 +1,49 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row no-gutters="">
+      <v-col class="pl-4" cols="12">
+        <div class="headline text-uppercase">Đăng ký xe</div>
+      </v-col>
       <v-col>
         <v-data-table
           :headers="headers"
           :items="listDangKy"
           :items-per-page="5"
           class="elevation-0"
+          :search="search"
         >
           <template v-slot:top>
-            <v-toolbar flat color="white">
-              <v-toolbar-title>Đăng ký xe</v-toolbar-title>
-              <v-divider class="mx-4" inset vertical></v-divider>
-              <v-spacer></v-spacer>
-              <v-dialog
-                v-model="dialogCreateOrUpdate"
-                fullscreen
-                hide-overlay
-                transition="dialog-bottom-transition"
+            <v-row
+              class="justify-end justify-md-center align-center text-center px-5"
+            >
+              <v-text-field
+                v-model="search"
+                class="mx-2"
+                placeholder="Tìm kiếm"
+              ></v-text-field>
+
+              <v-select
+                v-model="tinhTrang"
+                :items="listTinhTrang"
+                item-text="GhiChu"
+                item-value="TinhTrang"
+                placeholder="Tình trạng"
+                class="mx-2"
+              ></v-select>
+
+              <v-btn
+                color="primary"
+                small
+                dark
+                class="mx-2"
+                @click="createOrEditItem({ type: 'create' })"
               >
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    color="primary"
-                    small
-                    dark
-                    class="mb-2"
-                    v-on="on"
-                    @click="createOrEditItem({ type: 'create' })"
-                  >
-                    <v-icon small class="mr-2">
-                      mdi-plus
-                    </v-icon>
-                    <span>Thêm</span>
-                  </v-btn>
-                  <v-select
-                    v-model="tinhTrang"
-                    class="mr-5"
-                    :items="listTinhTrang"
-                    item-text="GhiChu"
-                    item-value="TinhTrang"
-                    label="Tình trạng"
-                  ></v-select>
-                </template>
-                <v-card v-if="Object.keys(dangKy).length">
-                  <v-toolbar dark color="primary">
-                    <v-btn icon dark @click="dialogCreateOrUpdate = false">
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                  </v-toolbar>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col>
-                          <v-form ref="formCreateOrUpdate">
-                            <v-row>
-                              <v-col>
-                                <v-text-field
-                                  v-model="soNguoiDi"
-                                  label="Số người đi"
-                                  :rules="[rules.required, rules.number]"
-                                  @input="dangKy['SoNguoiDi'] = soNguoiDi"
-                                ></v-text-field>
-                              </v-col>
-                            </v-row>
-                            <v-row>
-                              <v-col>
-                                <v-datetime-picker
-                                  :datetime="dateTimeDepart"
-                                  clear-text="Hủy"
-                                  label="Thời gian Đi"
-                                  date-format="dd/MM/yyyy"
-                                  :text-field-props="{
-                                    rules: [rules.required, ruleDate],
-                                    'persistent-hint': true,
-                                    hint: 'dd/MM/yyyy HH:mm',
-                                  }"
-                                  @input="
-                                    value => {
-                                      dangKy['NgayDi'] = value;
-                                      dateTimeDepart = value;
-                                    }
-                                  "
-                                >
-                                </v-datetime-picker>
-                              </v-col>
-                              <v-col>
-                                <v-datetime-picker
-                                  :datetime="dateTimeArrive"
-                                  clear-text="Hủy"
-                                  label="Thời gian về"
-                                  date-format="dd/MM/yyyy"
-                                  :text-field-props="{
-                                    rules: [rules.required, ruleDate],
-                                    'persistent-hint': true,
-                                    hint: 'dd/MM/yyyy HH:mm',
-                                  }"
-                                  @input="
-                                    value => {
-                                      dangKy['NgayVe'] = value;
-                                      dateTimeArrive = value;
-                                    }
-                                  "
-                                >
-                                </v-datetime-picker>
-                              </v-col>
-                            </v-row>
-                            <v-row>
-                              <v-col>
-                                <v-row no-gutters="">
-                                  <v-col cols="12">
-                                    <v-textarea
-                                      v-model="placeDepart"
-                                      label="Địa điểm khởi hành"
-                                      :rules="[
-                                        rules.required,
-                                        rules.maxLength.bind(null, 300),
-                                      ]"
-                                      persistent-hint
-                                      :hint="
-                                        ((placeDepart && placeDepart.length) ||
-                                          '0') + '/300'
-                                      "
-                                      @input="
-                                        dangKy['DiemKhoiHanh'] = placeDepart
-                                      "
-                                    ></v-textarea>
-                                  </v-col>
-                                  <v-col cols="12">
-                                    <v-radio-group
-                                      v-model="radioCampus"
-                                      row
-                                      @change="
-                                        campus => {
-                                          placeDepart = `${campus} Đại học Lạc Hồng`;
-                                        }
-                                      "
-                                    >
-                                      <v-radio
-                                        v-for="(campus, index) in listCampuses"
-                                        :key="index"
-                                        :label="campus"
-                                        :value="campus"
-                                      ></v-radio>
-                                    </v-radio-group>
-                                  </v-col>
-                                </v-row>
-                              </v-col>
-                              <v-col>
-                                <v-textarea
-                                  v-model="placeArrive"
-                                  label="Địa điểm đến"
-                                  :rules="[
-                                    rules.required,
-                                    rules.maxLength.bind(null, 300),
-                                  ]"
-                                  persistent-hint
-                                  :hint="
-                                    ((placeArrive && placeArrive.length) ||
-                                      '0') + '/300'
-                                  "
-                                  @input="dangKy['NoiDen'] = placeArrive"
-                                ></v-textarea>
-                              </v-col>
-                            </v-row>
-                            <v-textarea
-                              v-model="reason"
-                              label="Lý do"
-                              :rules="[
-                                rules.required,
-                                rules.maxLength.bind(null, 300),
-                              ]"
-                              persistent-hint
-                              :hint="
-                                ((reason && reason.length) || '0') + '/300'
-                              "
-                              @input="dangKy['LyDoDi'] = reason"
-                            ></v-textarea>
-                          </v-form>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="blue darken-1"
-                      dark
-                      @click="createOrUpdate(dangKy)"
-                    >
-                      Đồng ý
-                    </v-btn>
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-
-              <v-dialog v-model="dialogRemove" max-width="500px">
-                <v-card v-if="Object.keys(dangKy).length">
-                  <v-toolbar dark color="error">
-                    <v-btn icon dark @click="dialogRemove = false">
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                  </v-toolbar>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col>
-                          <div>{{ dangKy.message }}</div>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="red darken-1" text @click="remove(dangKy)">
-                      Đồng ý
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-toolbar>
+                <v-icon small class="mr-2">
+                  mdi-plus
+                </v-icon>
+                <span>Thêm</span>
+              </v-btn>
+            </v-row>
           </template>
 
           <template v-slot:item.actions="{ item }">
@@ -244,6 +60,190 @@
             </v-icon>
           </template>
         </v-data-table>
+
+        <v-dialog
+          v-model="dialogCreateOrUpdate"
+          fullscreen
+          hide-overlay
+          transition="dialog-bottom-transition"
+        >
+          <v-card v-if="Object.keys(dangKy).length">
+            <v-toolbar dark color="primary">
+              <v-btn icon dark @click="dialogCreateOrUpdate = false">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+              <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col>
+                    <v-form ref="formCreateOrUpdate">
+                      <v-row>
+                        <v-col>
+                          <v-text-field
+                            v-model="soNguoiDi"
+                            label="Số người đi"
+                            :rules="[rules.required, rules.number]"
+                            @input="dangKy['SoNguoiDi'] = soNguoiDi"
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col>
+                          <v-datetime-picker
+                            :datetime="dateTimeDepart"
+                            clear-text="Hủy"
+                            label="Thời gian Đi"
+                            date-format="dd/MM/yyyy"
+                            :text-field-props="{
+                              rules: [rules.required, ruleDate],
+                              'persistent-hint': true,
+                              hint: 'dd/MM/yyyy HH:mm',
+                            }"
+                            @input="
+                              value => {
+                                dangKy['NgayDi'] = value;
+                                dateTimeDepart = value;
+                              }
+                            "
+                          >
+                          </v-datetime-picker>
+                        </v-col>
+                        <v-col>
+                          <v-datetime-picker
+                            :datetime="dateTimeArrive"
+                            clear-text="Hủy"
+                            label="Thời gian về"
+                            date-format="dd/MM/yyyy"
+                            :text-field-props="{
+                              rules: [rules.required, ruleDate],
+                              'persistent-hint': true,
+                              hint: 'dd/MM/yyyy HH:mm',
+                            }"
+                            @input="
+                              value => {
+                                dangKy['NgayVe'] = value;
+                                dateTimeArrive = value;
+                              }
+                            "
+                          >
+                          </v-datetime-picker>
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col>
+                          <v-row no-gutters="">
+                            <v-col cols="12">
+                              <v-textarea
+                                v-model="placeDepart"
+                                label="Địa điểm khởi hành"
+                                :rules="[
+                                  rules.required,
+                                  rules.maxLength.bind(null, 300),
+                                ]"
+                                persistent-hint
+                                :hint="
+                                  ((placeDepart && placeDepart.length) || '0') +
+                                    '/300'
+                                "
+                                @input="dangKy['DiemKhoiHanh'] = placeDepart"
+                              ></v-textarea>
+                            </v-col>
+                            <v-col cols="12">
+                              <v-radio-group
+                                v-model="radioCampus"
+                                row
+                                @change="
+                                  campus => {
+                                    placeDepart = `${campus} Đại học Lạc Hồng`;
+                                  }
+                                "
+                              >
+                                <v-radio
+                                  v-for="(campus, index) in listCampuses"
+                                  :key="index"
+                                  :label="campus"
+                                  :value="campus"
+                                ></v-radio>
+                              </v-radio-group>
+                            </v-col>
+                          </v-row>
+                        </v-col>
+                        <v-col>
+                          <v-textarea
+                            v-model="placeArrive"
+                            label="Địa điểm đến"
+                            :rules="[
+                              rules.required,
+                              rules.maxLength.bind(null, 300),
+                            ]"
+                            persistent-hint
+                            :hint="
+                              ((placeArrive && placeArrive.length) || '0') +
+                                '/300'
+                            "
+                            @input="dangKy['NoiDen'] = placeArrive"
+                          ></v-textarea>
+                        </v-col>
+                      </v-row>
+                      <v-textarea
+                        v-model="reason"
+                        label="Lý do"
+                        :rules="[
+                          rules.required,
+                          rules.maxLength.bind(null, 300),
+                        ]"
+                        persistent-hint
+                        :hint="((reason && reason.length) || '0') + '/300'"
+                        @input="dangKy['LyDoDi'] = reason"
+                      ></v-textarea>
+                    </v-form>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" dark @click="createOrUpdate(dangKy)">
+                Đồng ý
+              </v-btn>
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="dialogRemove" max-width="500px">
+          <v-card v-if="Object.keys(dangKy).length">
+            <v-toolbar dark color="error">
+              <v-btn icon dark @click="dialogRemove = false">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+              <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col>
+                    <div>{{ dangKy.message }}</div>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="red darken-1" text @click="remove(dangKy)">
+                Đồng ý
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
     </v-row>
     <SnackBar ref="SnackBar" />
@@ -259,6 +259,7 @@ export default {
   },
   data(vm) {
     return {
+      search: '',
       dialogCreateOrUpdate: false,
       dialogRemove: false,
       rules: {

@@ -6,7 +6,7 @@ export default function({
   ...data
 }) {
   $axios.onRequest(config => {
-    console.log({ context });
+    // console.log({ context });
   });
 
   $axios.onError(error => {

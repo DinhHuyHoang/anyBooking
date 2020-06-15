@@ -1,107 +1,36 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row no-gutters="">
+      <v-col class="pl-4" cols="12">
+        <div class="headline text-uppercase">Danh sách đăng ký</div>
+      </v-col>
       <v-col>
         <v-data-table
           :headers="headers"
           :items="listDangKy"
           :items-per-page="5"
           class="elevation-0"
+          :search="search"
         >
           <template v-slot:top>
-            <v-toolbar flat color="white">
-              <v-toolbar-title>Danh sách đăng ký</v-toolbar-title>
-              <v-divider class="mx-4" inset vertical></v-divider>
-              <v-spacer></v-spacer>
+            <v-row
+              class="justify-end justify-md-center align-center text-center px-5"
+            >
+              <v-text-field
+                v-model="search"
+                class="mx-2"
+                placeholder="Tìm kiếm"
+              ></v-text-field>
+
               <v-select
                 v-model="tinhTrang"
                 :items="listTinhTrang"
                 item-text="GhiChu"
                 item-value="TinhTrang"
                 label="Tình trạng"
+                class="mx-2"
               ></v-select>
-              <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
-                <v-card v-if="Object.keys(dangKy).length">
-                  <v-toolbar dark color="primary">
-                    <v-btn icon dark @click="dialogCreateOrUpdate = false">
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                  </v-toolbar>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col>
-                          <v-form ref="formCreateOrUpdate">
-                            <v-select
-                              v-if="state === '3'"
-                              v-model="xe"
-                              :items="listXe"
-                              item-text="text"
-                              return-object
-                              label="Xe"
-                              :rules="[rules.required]"
-                              @change="
-                                () => {
-                                  dangKy['XeID'] = xe.XeID;
-                                }
-                              "
-                            ></v-select>
-                            <v-select
-                              v-if="state === '3'"
-                              v-model="taiXe"
-                              :items="listTaiXe"
-                              item-text="HoTenTX"
-                              return-object
-                              label="Tài xế"
-                              :rules="[rules.required]"
-                              @change="
-                                () => {
-                                  dangKy['TaiXeID'] = taiXe.TaiXeID;
-                                }
-                              "
-                            ></v-select>
-                            <v-textarea
-                              v-model="ghiChu"
-                              label="Ghi chú"
-                              :rules="[state == 3 ? true : rules.required]"
-                              @input="dangKy['GhiChu'] = ghiChu"
-                            ></v-textarea>
-                            <v-radio-group
-                              v-model="state"
-                              :rules="[rules.required]"
-                              @change="
-                                () => {
-                                  dangKy['TinhTrang'] = Number(state);
-                                  dangKy['TaiXeID'] = 0;
-                                  dangKy['XeID'] = 0;
-                                }
-                              "
-                            >
-                              <v-radio label="Không cấp xe" value="4"></v-radio>
-                              <v-radio label="Cấp xe" value="3"></v-radio>
-                            </v-radio-group>
-                          </v-form>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="blue darken-1"
-                      dark
-                      @click="createOrUpdate(dangKy)"
-                      >Đồng ý</v-btn
-                    >
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-toolbar>
+            </v-row>
           </template>
 
           <template v-slot:item.actions="{ item }">
@@ -119,6 +48,85 @@
             </v-btn>
           </template>
         </v-data-table>
+
+        <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
+          <v-card v-if="Object.keys(dangKy).length">
+            <v-toolbar dark color="primary">
+              <v-btn icon dark @click="dialogCreateOrUpdate = false">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+              <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col>
+                    <v-form ref="formCreateOrUpdate">
+                      <v-select
+                        v-if="state === '3'"
+                        v-model="xe"
+                        :items="listXe"
+                        item-text="text"
+                        return-object
+                        label="Xe"
+                        :rules="[rules.required]"
+                        @change="
+                          () => {
+                            dangKy['XeID'] = xe.XeID;
+                          }
+                        "
+                      ></v-select>
+                      <v-select
+                        v-if="state === '3'"
+                        v-model="taiXe"
+                        :items="listTaiXe"
+                        item-text="HoTenTX"
+                        return-object
+                        label="Tài xế"
+                        :rules="[rules.required]"
+                        @change="
+                          () => {
+                            dangKy['TaiXeID'] = taiXe.TaiXeID;
+                          }
+                        "
+                      ></v-select>
+                      <v-textarea
+                        v-model="ghiChu"
+                        label="Ghi chú"
+                        :rules="[state == 3 ? true : rules.required]"
+                        @input="dangKy['GhiChu'] = ghiChu"
+                      ></v-textarea>
+                      <v-radio-group
+                        v-model="state"
+                        :rules="[rules.required]"
+                        @change="
+                          () => {
+                            dangKy['TinhTrang'] = Number(state);
+                            dangKy['TaiXeID'] = 0;
+                            dangKy['XeID'] = 0;
+                          }
+                        "
+                      >
+                        <v-radio label="Không cấp xe" value="4"></v-radio>
+                        <v-radio label="Cấp xe" value="3"></v-radio>
+                      </v-radio-group>
+                    </v-form>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" dark @click="createOrUpdate(dangKy)"
+                >Đồng ý</v-btn
+              >
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
     </v-row>
     <SnackBar ref="SnackBar" />
@@ -134,6 +142,7 @@ export default {
     SnackBar,
   },
   data: () => ({
+    search: '',
     dialogCreateOrUpdate: false,
     dialogRemove: false,
     rules: {

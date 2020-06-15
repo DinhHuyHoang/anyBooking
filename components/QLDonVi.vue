@@ -1,80 +1,36 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row no-gutters>
+      <v-col class="pl-4" cols="12">
+        <div class="headline text-uppercase">Danh sách đăng ký</div>
+      </v-col>
       <v-col>
         <v-data-table
           :headers="headers"
           :items="listDangKy"
           :items-per-page="5"
           class="elevation-0"
+          :search="search"
         >
           <template v-slot:top>
-            <v-toolbar flat color="white">
-              <v-toolbar-title>Danh sách đăng ký</v-toolbar-title>
-              <v-divider class="mx-4" inset vertical></v-divider>
-              <v-spacer></v-spacer>
+            <v-row
+              class="justify-end justify-md-center align-center text-center px-5"
+            >
+              <v-text-field
+                v-model="search"
+                class="mx-2"
+                placeholder="Tìm kiếm"
+              ></v-text-field>
+
               <v-select
                 v-model="tinhTrang"
                 :items="listTinhTrang"
                 item-text="GhiChu"
                 item-value="TinhTrang"
                 label="Tình trạng"
+                class="mx-2"
               ></v-select>
-              <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
-                <v-card v-if="Object.keys(dangKy).length">
-                  <v-toolbar dark color="primary">
-                    <v-btn icon dark @click="dialogCreateOrUpdate = false">
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                  </v-toolbar>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col>
-                          <v-form ref="formCreateOrUpdate">
-                            <v-textarea
-                              v-if="state == 0"
-                              v-model="ghiChu"
-                              label="Ghi chú"
-                              :rules="[rules.required]"
-                              @input="dangKy['GhiChu'] = ghiChu"
-                            ></v-textarea>
-                            <v-radio-group
-                              v-model="state"
-                              :rules="[rules.required]"
-                              @change="
-                                value => {
-                                  dangKy['TinhTrang'] = Number(value);
-                                }
-                              "
-                            >
-                              <v-radio label="Không duyệt" value="0"></v-radio>
-                              <v-radio label="Duyệt" value="2"></v-radio>
-                            </v-radio-group>
-                          </v-form>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="blue darken-1"
-                      dark
-                      small
-                      @click="createOrUpdate(dangKy)"
-                    >
-                      Đồng ý
-                    </v-btn>
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-toolbar>
+            </v-row>
           </template>
 
           <template v-slot:item.actions="{ item }">
@@ -90,6 +46,60 @@
               <span> Duyệt</span>
             </v-btn>
           </template>
+          <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
+            <v-card v-if="Object.keys(dangKy).length">
+              <v-toolbar dark color="primary">
+                <v-btn icon dark @click="dialogCreateOrUpdate = false">
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+                <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
+                <v-spacer></v-spacer>
+              </v-toolbar>
+
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col>
+                      <v-form ref="formCreateOrUpdate">
+                        <v-textarea
+                          v-if="state == 0"
+                          v-model="ghiChu"
+                          label="Ghi chú"
+                          :rules="[rules.required]"
+                          @input="dangKy['GhiChu'] = ghiChu"
+                        ></v-textarea>
+                        <v-radio-group
+                          v-model="state"
+                          :rules="[rules.required]"
+                          @change="
+                            value => {
+                              dangKy['TinhTrang'] = Number(value);
+                            }
+                          "
+                        >
+                          <v-radio label="Không duyệt" value="0"></v-radio>
+                          <v-radio label="Duyệt" value="2"></v-radio>
+                        </v-radio-group>
+                      </v-form>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card-text>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="blue darken-1"
+                  dark
+                  small
+                  @click="createOrUpdate(dangKy)"
+                >
+                  Đồng ý
+                </v-btn>
+                <v-spacer></v-spacer>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-data-table>
       </v-col>
     </v-row>
@@ -105,6 +115,7 @@ export default {
     SnackBar,
   },
   data: () => ({
+    search: '',
     dialogCreateOrUpdate: false,
     dialogRemove: false,
     rules: {
