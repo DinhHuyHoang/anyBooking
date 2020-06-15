@@ -33,6 +33,14 @@
                     </v-icon>
                     <span>Thêm</span>
                   </v-btn>
+                  <v-select
+                    v-model="tinhTrang"
+                    class="mr-5"
+                    :items="listTinhTrang"
+                    item-text="GhiChu"
+                    item-value="TinhTrang"
+                    label="Tình trạng"
+                  ></v-select>
                 </template>
                 <v-card v-if="Object.keys(dangKy).length">
                   <v-toolbar dark color="primary">
@@ -61,7 +69,7 @@
                             <v-row>
                               <v-col>
                                 <v-datetime-picker
-                                  v-model="dateTimeDepart"
+                                  :datetime="dateTimeDepart"
                                   clear-text="Hủy"
                                   label="Thời gian Đi"
                                   date-format="dd/MM/yyyy"
@@ -70,13 +78,18 @@
                                     'persistent-hint': true,
                                     hint: 'dd/MM/yyyy HH:mm',
                                   }"
-                                  @input="dangKy['NgayDi'] = dateTimeDepart"
+                                  @input="
+                                    value => {
+                                      dangKy['NgayDi'] = value;
+                                      dateTimeDepart = value;
+                                    }
+                                  "
                                 >
                                 </v-datetime-picker>
                               </v-col>
                               <v-col>
                                 <v-datetime-picker
-                                  v-model="dateTimeArrive"
+                                  :datetime="dateTimeArrive"
                                   clear-text="Hủy"
                                   label="Thời gian về"
                                   date-format="dd/MM/yyyy"
@@ -85,7 +98,12 @@
                                     'persistent-hint': true,
                                     hint: 'dd/MM/yyyy HH:mm',
                                   }"
-                                  @input="dangKy['NgayVe'] = dateTimeArrive"
+                                  @input="
+                                    value => {
+                                      dangKy['NgayVe'] = value;
+                                      dateTimeArrive = value;
+                                    }
+                                  "
                                 >
                                 </v-datetime-picker>
                               </v-col>
@@ -253,6 +271,8 @@ export default {
         { text: 'Thời gian đi', value: 'NgayDi' },
         { text: 'Thời gian về', value: 'NgayVe' },
         { text: 'Thời gian ĐK', value: 'NgayDK' },
+        { text: 'Khởi hành', value: 'DiemKhoiHanh' },
+        { text: 'Nơi đến', value: 'NoiDen' },
         { text: 'Lý do', value: 'LyDoDi' },
         { text: 'Tình trạng', value: 'GhiChuTinhTrang' },
         { text: 'Ghi chú', value: 'GhiChu' },
@@ -276,6 +296,8 @@ export default {
       reason: null,
       soNguoiDi: null,
       dangKy: {},
+      listTinhTrang: [],
+      tinhTrang: 1,
     };
   },
   computed: {
@@ -292,8 +314,15 @@ export default {
     },
   },
 
+  watch: {
+    tinhTrang() {
+      this.getListDangKy({ TinhTrang: this.tinhTrang });
+    },
+  },
+
   created() {
     this.getListDangKy();
+    this.getListTrangThai();
     this.initialize();
   },
 
@@ -317,9 +346,16 @@ export default {
       return new Date(date);
     },
 
-    async getListDangKy() {
-      const { data } = await this.$axios(API.getListDangKyXe());
+    async getListDangKy(dangKy = { TinhTrang: 1 }) {
+      const { data } = await this.$axios(API.getListDangKyXe({ dangKy }));
       this.listDangKy = data;
+    },
+
+    async getListTrangThai() {
+      const { data } = await this.$axios(
+        API.getListTinhTrangDangKy({ typeUser: 'somethingUser' })
+      );
+      this.listTinhTrang = data;
     },
 
     createOrEditItem({ type, data = {} }) {

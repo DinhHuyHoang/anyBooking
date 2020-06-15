@@ -83,6 +83,7 @@ export default {
     /*
      ** You can extend webpack config here
      */
+
     extend(config, { isClient }) {
       if (isClient) {
         config.optimization.splitChunks = {

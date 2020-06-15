@@ -1,88 +1,71 @@
 <template>
-  <v-row justify="center">
-    <v-dialog
-      v-model="isOpen"
-      fullscreen
-      hide-overlay
-      transition="dialog-bottom-transition"
-    >
-      <v-card>
-        <v-toolbar dark color="primary">
-          <v-btn icon dark @click="toggleDialog()">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-          <v-toolbar-title>Tạo báo cáo</v-toolbar-title>
-          <v-spacer></v-spacer>
-        </v-toolbar>
-        <v-card-text>
-          <v-radio-group v-model="typeReport" row>
-            <v-radio label="Báo cáo theo đơn vị" value="0"></v-radio>
-            <v-radio label="Báo cáo theo tháng" value="1"></v-radio>
-          </v-radio-group>
-          <div v-if="typeReport == 0">
-            <v-form ref="formBaoCaoTheoDonVi">
-              <v-row>
-                <v-col cols="4">
-                  <v-combobox
-                    v-model="donVi"
-                    :items="listDonVi"
-                    label="Đơn vị"
-                    item-text="TenPhongBan"
-                    item-value="PhongBanID"
+  <v-row>
+    <v-col>
+      <v-radio-group v-model="typeReport" row>
+        <v-radio label="Báo cáo theo đơn vị" value="0"></v-radio>
+        <v-radio label="Báo cáo theo tháng" value="1"></v-radio>
+      </v-radio-group>
+      <div v-if="typeReport == 0">
+        <v-form ref="formBaoCaoTheoDonVi">
+          <v-row class="align-center">
+            <v-col cols="6">
+              <v-combobox
+                v-model="donVi"
+                :items="listDonVi"
+                label="Đơn vị"
+                item-text="TenPhongBan"
+                item-value="PhongBanID"
+                :rules="[rules.required]"
+              ></v-combobox>
+            </v-col>
+
+            <v-col cols="6">
+              <v-btn @click="generateReport()">
+                Tạo báo cáo
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
+      </div>
+      <div v-if="typeReport == 1">
+        <v-form ref="formBaoCaoTheoThang">
+          <v-row class="align-center">
+            <v-col cols="6">
+              <v-menu
+                v-model="menu"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="date"
+                    label="Chọn tháng"
+                    prepend-icon="event"
+                    readonly
+                    v-bind="attrs"
                     :rules="[rules.required]"
-                  ></v-combobox>
-                </v-col>
-                <v-col cols="12"></v-col>
-                <v-col>
-                  <v-btn @click="generateReport()">
-                    Tạo báo cáo
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-form>
-          </div>
-          <div v-if="typeReport == 1">
-            <v-form ref="formBaoCaoTheoThang">
-              <v-row>
-                <v-col cols="4">
-                  <v-menu
-                    v-model="menu"
-                    :close-on-content-click="false"
-                    :nudge-right="40"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="290px"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-model="date"
-                        label="Chọn tháng"
-                        prepend-icon="event"
-                        readonly
-                        v-bind="attrs"
-                        :rules="[rules.required]"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="date"
-                      type="month"
-                      @input="menu = false"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-col>
-                <v-col cols="12"></v-col>
-                <v-col>
-                  <v-btn @click="generateReport()">
-                    Tạo báo cáo
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-form>
-          </div>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="date"
+                  type="month"
+                  @input="menu = false"
+                ></v-date-picker>
+              </v-menu>
+            </v-col>
+            <v-col cols="6">
+              <v-btn @click="generateReport()">
+                Tạo báo cáo
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
+      </div>
+    </v-col>
   </v-row>
 </template>
 
@@ -92,17 +75,6 @@ import getConfigReportDonVi from '~/config/report/reportDonVi';
 import getConfigReportThang from '~/config/report/reportThang';
 
 export default {
-  props: {
-    isOpen: {
-      required: true,
-      type: Boolean,
-    },
-    toggleDialog: {
-      required: true,
-      type: Function,
-    },
-  },
-
   data: () => ({
     date: null,
     menu: false,

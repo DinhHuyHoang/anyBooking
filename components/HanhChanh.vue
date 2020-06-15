@@ -36,7 +36,7 @@
                         <v-col>
                           <v-form ref="formCreateOrUpdate">
                             <v-select
-                              v-if="state === '4'"
+                              v-if="state === '3'"
                               v-model="xe"
                               :items="listXe"
                               item-text="text"
@@ -50,7 +50,7 @@
                               "
                             ></v-select>
                             <v-select
-                              v-if="state === '4'"
+                              v-if="state === '3'"
                               v-model="taiXe"
                               :items="listTaiXe"
                               item-text="HoTenTX"
@@ -66,7 +66,7 @@
                             <v-textarea
                               v-model="ghiChu"
                               label="Ghi chú"
-                              :rules="[state == 4 ? true : rules.required]"
+                              :rules="[state == 3 ? true : rules.required]"
                               @input="dangKy['GhiChu'] = ghiChu"
                             ></v-textarea>
                             <v-radio-group
@@ -80,8 +80,8 @@
                                 }
                               "
                             >
-                              <v-radio label="Không cấp xe" value="3"></v-radio>
-                              <v-radio label="Cấp xe" value="4"></v-radio>
+                              <v-radio label="Không cấp xe" value="4"></v-radio>
+                              <v-radio label="Cấp xe" value="3"></v-radio>
                             </v-radio-group>
                           </v-form>
                         </v-col>
@@ -105,15 +105,18 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <span
+            <v-btn
               v-if="item.TinhTrang === 2"
+              text
+              outlined
+              small
               @click="createOrEditItem({ type: 'edit', data: item })"
             >
               <v-icon small class="mr-2">
                 mdi-pencil
               </v-icon>
               <span>Duyệt</span>
-            </span>
+            </v-btn>
           </template>
         </v-data-table>
       </v-col>
@@ -146,19 +149,20 @@ export default {
       { text: 'Khởi hành', value: 'DiemKhoiHanh' },
       { text: 'Nơi đến', value: 'NoiDen' },
       { text: 'Lý do', value: 'LyDoDi' },
+      { text: 'Người ĐK', value: 'NhanVienDK' },
       { text: '', value: 'actions', sortable: false },
     ],
     listDangKy: [],
     listTinhTrang: [],
     tinhTrang: 2,
     ghiChu: null,
-    state: '4',
+    state: '3',
     listXe: [],
     listTaiXe: [],
     taiXe: null,
     xe: null,
     dangKy: {
-      TinhTrang: 4,
+      TinhTrang: 3,
     },
   }),
 
@@ -184,7 +188,7 @@ export default {
 
   methods: {
     initialize() {
-      this.state = '4';
+      this.state = '3';
       this.ghiChu = null;
       this.taiXe = null;
       this.xe = null;
@@ -222,7 +226,7 @@ export default {
         formTitle: type === 'create' ? 'Duyệt đăng ký' : 'Duyệt đăng ký',
         MaDK: type === 'create' ? 0 : undefined,
         ...data,
-        TinhTrang: 4,
+        TinhTrang: 3,
       };
       this.initialize();
       this.dangKy = dangKy;

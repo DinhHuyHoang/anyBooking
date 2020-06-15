@@ -65,6 +65,7 @@
                     <v-btn
                       color="blue darken-1"
                       dark
+                      small
                       @click="createOrUpdate(dangKy)"
                     >
                       Đồng ý
@@ -77,15 +78,17 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <span
+            <v-btn
               v-if="item.TinhTrang === 1"
+              text
+              outlined
               @click="createOrEditItem({ type: 'edit', data: item })"
             >
               <v-icon small class="mr-2">
                 mdi-pencil
               </v-icon>
               <span> Duyệt</span>
-            </span>
+            </v-btn>
           </template>
         </v-data-table>
       </v-col>
@@ -113,10 +116,10 @@ export default {
       { text: 'Thời gian đi', value: 'NgayDi' },
       { text: 'Thời gian về', value: 'NgayVe' },
       { text: 'Thời gian ĐK', value: 'NgayDK' },
-      { text: 'Người ĐK', value: 'NhanVienDK' },
       { text: 'Khởi hành', value: 'DiemKhoiHanh' },
       { text: 'Nơi đến', value: 'NoiDen' },
       { text: 'Lý do', value: 'LyDoDi' },
+      { text: 'Người ĐK', value: 'NhanVienDK' },
       { text: '', value: 'actions', sortable: false },
     ],
     listDangKy: [],

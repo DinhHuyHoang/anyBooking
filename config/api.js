@@ -106,11 +106,12 @@ export default {
    *  API Dang ky xe
    */
 
-  getListDangKyXe() {
+  getListDangKyXe({ dangKy }) {
     return {
       ...Authorization,
-      method: 'GET',
+      method: 'POST',
       url: baseURL + `/User_SelectDangKiXe`,
+      data: { ...dangKy },
     };
   },
 

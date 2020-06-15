@@ -1,6 +1,12 @@
-export default function({ $axios, redirect, store, ...data }) {
+export default function({
+  $axios,
+  redirect,
+  store,
+  app: { context },
+  ...data
+}) {
   $axios.onRequest(config => {
-    // console.log('Making request to ' + config.url)
+    console.log({ context });
   });
 
   $axios.onError(error => {
@@ -11,7 +17,8 @@ export default function({ $axios, redirect, store, ...data }) {
     }
 
     if (code === 401) {
-      // redirect('https://app.lhu.edu.vn/?ur=booking.lhu.edu.vn/');
+      if (process.env.NODE_ENV === 'production')
+        redirect('https://app.lhu.edu.vn/?ur=booking.lhu.edu.vn/');
       return;
     }
 
