@@ -19,14 +19,22 @@
               HỆ THỐNG ĐĂNG KÝ XE
             </div>
           </v-col>
-          <v-col class="text-center text-md-right" cols="12" md="8">
+          <v-col class="text-center text-md-right pa-0" cols="12" md="8">
+            <v-btn
+              v-if="checkRight(userRight.nhanVienTaiXe)"
+              text
+              :outlined="menu.nhanVienTaiXe"
+              @click="toggleMenu({ nhanVienTaiXe: true })"
+            >
+              Tài xế
+            </v-btn>
             <v-btn
               v-if="checkRight(userRight.phongHanhChanh)"
               text
               :outlined="menu.taiXe"
               @click="toggleMenu({ taiXe: true })"
             >
-              Tài xế
+              DS Tài xế
             </v-btn>
             <v-btn
               v-if="checkRight(userRight.phongHanhChanh)"
@@ -34,7 +42,7 @@
               :outlined="menu.xe"
               @click="toggleMenu({ xe: true })"
             >
-              Xe
+              DS Xe
             </v-btn>
             <v-btn
               text
@@ -76,28 +84,29 @@
           </v-col>
         </v-row>
       </v-app-bar>
-      <v-container class="pa-0">
-        <v-row no-gutters>
-          <v-col v-if="menu.taiXe" class="pa-0" cols="12">
-            <TaiXeComp />
-          </v-col>
-          <v-col v-if="menu.xe" class="pa-0" cols="12">
-            <XeComp />
-          </v-col>
-          <v-col v-if="menu.dangKy" class="pa-0" cols="12">
-            <DangKyXeComp />
-          </v-col>
-          <v-col v-if="menu.donVi" class="pa-0" cols="12">
-            <QLDonViComp />
-          </v-col>
-          <v-col v-if="menu.capXe" class="pa-0" cols="12">
-            <HanhChanhComp />
-          </v-col>
-          <v-col v-if="menu.baoCao" class="pa-0" cols="12">
-            <BaoCaoComp />
-          </v-col>
-        </v-row>
-      </v-container>
+      <v-row no-gutters>
+        <v-col v-if="menu.taiXe" class="pa-0" cols="12">
+          <TaiXeComp />
+        </v-col>
+        <v-col v-if="menu.xe" class="pa-0" cols="12">
+          <XeComp />
+        </v-col>
+        <v-col v-if="menu.dangKy" class="pa-0" cols="12">
+          <DangKyXeComp />
+        </v-col>
+        <v-col v-if="menu.donVi" class="pa-0" cols="12">
+          <QLDonViComp />
+        </v-col>
+        <v-col v-if="menu.capXe" class="pa-0" cols="12">
+          <HanhChanhComp />
+        </v-col>
+        <v-col v-if="menu.baoCao" class="pa-0" cols="12">
+          <BaoCaoComp />
+        </v-col>
+        <v-col v-if="menu.nhanVienTaiXe" class="pa-0" cols="12">
+          <NhanVienTaiXeComp />
+        </v-col>
+      </v-row>
     </div>
   </div>
 </template>
@@ -109,6 +118,7 @@ import DangKyXeComp from '~/components/DangKyXe';
 import QLDonViComp from '~/components/QLDonVi';
 import HanhChanhComp from '~/components/HanhChanh';
 import BaoCaoComp from '~/components/BaoCao';
+import NhanVienTaiXeComp from '~/components/NhanVienTaiXe';
 import API from '~/config/api';
 
 function getFunctionRight({ rights = '[0]' }) {
@@ -128,6 +138,7 @@ export default {
     QLDonViComp,
     HanhChanhComp,
     BaoCaoComp,
+    NhanVienTaiXeComp,
   },
 
   async asyncData({ $axios }) {
@@ -137,24 +148,29 @@ export default {
       rights = getFunctionRight({ rights: data.Quyen });
     }
 
-    return { rights };
-  },
-
-  data: () => ({
-    userRight: {
-      phongHanhChanh: '1',
-      truongPhong: '2',
-      nhanVien: '3',
-    },
-    menu: {
+    const menu = {
       xe: false,
       taiXe: false,
-      dangKy: true,
-      donVi: false,
-      capXe: false,
+      dangKy: rights[0] === '3',
+      donVi: rights[0] === '2',
+      capXe: rights[0] === '1',
       baoCao: false,
-    },
-  }),
+      nhanVienTaiXe: rights[0] === '4',
+    };
+
+    return { rights, menu };
+  },
+
+  data(vm) {
+    return {
+      userRight: {
+        phongHanhChanh: '1',
+        truongPhong: '2',
+        nhanVien: '3',
+        nhanVienTaiXe: '4',
+      },
+    };
+  },
 
   methods: {
     checkRight(expectRight = 0) {
@@ -169,6 +185,7 @@ export default {
         donVi: false,
         capXe: false,
         baoCao: false,
+        nhanVienTaiXe: false,
         ...menu,
       };
     },

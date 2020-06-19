@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-row no-gutters>
       <v-col>
         <v-radio-group v-model="typeReport" row>
@@ -19,6 +19,60 @@
                   :rules="[rules.required]"
                 ></v-combobox>
               </v-col>
+              <v-col cols="12"></v-col>
+              <v-col cols="6">
+                <v-menu
+                  v-model="menuDayTo"
+                  :close-on-content-click="false"
+                  :nudge-right="40"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="donViDayTo"
+                      label="Từ ngày"
+                      prepend-icon="event"
+                      readonly
+                      v-bind="attrs"
+                      :rules="[rules.required]"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="donViDayTo"
+                    @input="menuDayTo = false"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
+
+              <v-col cols="6">
+                <v-menu
+                  v-model="menuDayFrom"
+                  :close-on-content-click="false"
+                  :nudge-right="40"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="donViDayFrom"
+                      label="Đến ngày"
+                      prepend-icon="event"
+                      readonly
+                      v-bind="attrs"
+                      :rules="[rules.required]"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="donViDayFrom"
+                    @input="menuDayFrom = false"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
 
               <v-col cols="6">
                 <v-btn @click="generateReport()">
@@ -31,6 +85,16 @@
         <div v-if="typeReport == 1">
           <v-form ref="formBaoCaoTheoThang">
             <v-row class="align-center">
+              <v-col cols="6">
+                <v-combobox
+                  v-model="donVi"
+                  :items="listDonVi"
+                  label="Đơn vị"
+                  item-text="TenPhongBan"
+                  item-value="PhongBanID"
+                  :rules="[rules.required]"
+                ></v-combobox>
+              </v-col>
               <v-col cols="6">
                 <v-menu
                   v-model="menu"
@@ -88,6 +152,10 @@ export default {
       maxLength: (max, value = '') =>
         (value && value.length <= max) || `Không được quá ${max} ký tự`,
     },
+    menuDayTo: false,
+    menuDayFrom: false,
+    donViDayTo: null,
+    donViDayFrom: null,
   }),
 
   created() {
@@ -109,6 +177,9 @@ export default {
       const { formBaoCaoTheoThang } = this.$refs;
       if (!formBaoCaoTheoThang.validate()) return;
 
+      const {
+        donVi: { PhongBanID, TenPhongBan },
+      } = this.$data;
       const date = this.$moment(this.date, 'YYYY-MM');
       const month = (date.month() + 1).toLocaleString('en-US', {
         minimumIntegerDigits: 2,
@@ -116,7 +187,9 @@ export default {
       });
       const year = date.year();
 
-      const { data } = await this.$axios(API.getReportThang({ month, year }));
+      const { data } = await this.$axios(
+        API.getReportThang({ month, year, donVi: PhongBanID })
+      );
 
       const dataTables = [];
       let Stt = 1;
@@ -131,7 +204,7 @@ export default {
           TenPhongBan,
         } = row;
         dataTables.push([
-          Stt,
+          { text: Stt, alignment: 'center' },
           TenPhongBan,
           NgayDi,
           NgayVe,
@@ -156,7 +229,11 @@ export default {
       } = this.$data;
 
       const { data } = await this.$axios(
-        API.getReportByDonVi({ donVi: PhongBanID })
+        API.getReportByDonVi({
+          donVi: PhongBanID,
+          tuNgay: this.donViDayTo,
+          denNgay: this.donViDayFrom,
+        })
       );
 
       // eslint-disable-next-line prefer-const
@@ -165,7 +242,7 @@ export default {
       for (const row of data) {
         const { NgayDi, NgayVe, NoiDen, LyDoDi, HoNV, TenNV } = row;
         dataTables.push([
-          Stt,
+          { text: Stt, alignment: 'center' },
           TenPhongBan,
           NgayDi,
           NgayVe,
@@ -177,7 +254,13 @@ export default {
       }
 
       this.$pdfMake
-        .createPdf(getConfigReportDonVi({ donVi: TenPhongBan, dataTables }))
+        .createPdf(
+          getConfigReportDonVi({
+            donVi:
+              PhongBanID === '0' ? 'tất cả đơn vị' : `đơn vị ${TenPhongBan}`,
+            dataTables,
+          })
+        )
         .open();
     },
   },

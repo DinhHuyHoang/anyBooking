@@ -180,6 +180,23 @@ export default {
     };
   },
 
+  getLichTrinhTaiXe({ id = 'NV0000220' }) {
+    return {
+      ...Authorization,
+      method: 'GET',
+      url: baseURL + `/TaiXe_XemLich/${id}`,
+    };
+  },
+
+  confirmLichTrinh({ dangKy }) {
+    return {
+      ...Authorization,
+      method: 'POST',
+      url: baseURL + `/obj/TaiXe_XacNhan`,
+      data: { ...dangKy },
+    };
+  },
+
   /**
    *  API Bao cao
    */
@@ -191,19 +208,23 @@ export default {
     };
   },
 
-  getReportByDonVi({ donVi }) {
+  getReportByDonVi({ donVi, tuNgay, denNgay }) {
     return {
       ...Authorization,
       method: 'GET',
-      url: baseURL + `/BaoCaoTinhHinhXeDiCongTacTheoDonVi/${donVi}`,
+      url:
+        baseURL +
+        `/BaoCaoTinhHinhXeDiCongTacTheoDonVi/${donVi}/${tuNgay}/${denNgay}`,
     };
   },
 
-  getReportThang({ month, year }) {
+  getReportThang({ month, year, donVi }) {
     return {
       ...Authorization,
       method: 'GET',
-      url: baseURL + `/BaoCaoTinhHinhXeDiCongTacTheoThang/${month}/${year}`,
+      url:
+        baseURL +
+        `/BaoCaoTinhHinhXeDiCongTacTheoThang/${month}/${year}/${donVi}`,
     };
   },
 };

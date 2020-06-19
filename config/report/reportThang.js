@@ -33,24 +33,23 @@ export default ({
       canvas: [
         {
           type: 'line',
-          x1: 70,
+          x1: 85,
           y1: 5,
-          x2: 200,
+          x2: 175,
           y2: 5,
           lineWidth: 1,
         },
         {
           type: 'line',
-          x1: 320,
+          x1: 312,
           y1: 5,
-          x2: 460,
+          x2: 462,
           y2: 5,
           lineWidth: 1,
         },
       ],
     },
     {
-      italics: true,
       alignment: 'center',
       margin: [0, 4, 0, 0],
       columns: [
@@ -75,7 +74,7 @@ export default ({
           type: 'line',
           x1: 200,
           y1: 5,
-          x2: 310,
+          x2: 320,
           y2: 5,
           lineWidth: 1,
         },
@@ -84,7 +83,7 @@ export default ({
     {
       alignment: 'center',
       margin: [0, 32, 0, 16],
-      text: `Trong tháng ${month}/${year}, tình hình các đơn vị đã đăng ký xe đi công tác như sau`,
+      text: `Trong tháng ${month}/${year}, tình hình các đơn vị đã đăng ký xe đi công tác như sau:`,
     },
     {
       table: {
@@ -92,13 +91,17 @@ export default ({
         widths: [20, 100, 'auto', 'auto', 'auto', 80, 70],
         body: [
           [
-            { text: 'TT', alignment: 'center' },
-            { text: 'Đơn vị đề xuất', alignment: 'center' },
-            { text: 'Ngày giờ đi', alignment: 'center' },
-            { text: 'Ngày giờ về', alignment: 'center' },
-            { text: 'Nơi đến', alignment: 'center' },
-            { text: 'Lý do đi', alignment: 'center' },
-            { text: 'Người đề xuất \n điều xe', alignment: 'center' },
+            { text: 'TT', alignment: 'center', bold: true },
+            { text: 'Đơn vị đề xuất', alignment: 'center', bold: true },
+            { text: 'Ngày giờ đi', alignment: 'center', bold: true },
+            { text: 'Ngày giờ về', alignment: 'center', bold: true },
+            { text: 'Nơi đến', alignment: 'center', bold: true },
+            { text: 'Lý do đi', alignment: 'center', bold: true },
+            {
+              text: 'Người đề xuất \n điều xe',
+              alignment: 'center',
+              bold: true,
+            },
           ],
           ...dataTables,
         ],
@@ -106,7 +109,7 @@ export default ({
     },
     {
       margin: [32, 16, 0, 0],
-      text: `\u200B\t\u200B\tTrên đây là báo cáo tình hình các đơn vị đã đăng ký xe đi công tác tháng ${month}/${year} ./.`,
+      text: `\u200B\t\u200B\tTrên đây là báo cáo tình hình các đơn vị đã đăng ký xe đi công tác tháng ${month}/${year}./.`,
     },
     {
       margin: [32, 32, 0, 0],
@@ -118,7 +121,7 @@ export default ({
               bold: true,
               italics: true,
             },
-            '\n - Thầy Hiệu trưởng',
+            '\n - Thầy Hiệu trưởng;',
             '\n - Lưu: P.HC-TC, (433).',
           ],
         },

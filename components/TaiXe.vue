@@ -1,6 +1,6 @@
 <template>
-  <v-container>
-    <v-row>
+  <v-container fluid class="pa-0">
+    <v-row no-gutters="">
       <v-col>
         <v-data-table
           :headers="headers"

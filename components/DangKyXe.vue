@@ -1,12 +1,12 @@
 <template>
-  <v-container>
+  <v-container fluid class="pa-0 mt-3" style="overflow: hidden;">
     <v-row no-gutters="">
       <v-col class="pl-4" cols="12">
         <div class="headline text-uppercase">Đăng ký xe</div>
       </v-col>
       <v-col>
         <v-data-table
-          :headers="headers"
+          :headers="computedHeaders"
           :items="listDangKy"
           :items-per-page="5"
           class="elevation-0"
@@ -59,8 +59,13 @@
               mdi-delete
             </v-icon>
           </template>
+
+          <template v-slot:item.SoDT="{ item }">
+            <a :href="`tel:${item.SoDT}`">{{ item.SoDT }}</a>
+          </template>
         </v-data-table>
 
+        <!-- ************************************ Dialog ************************************ -->
         <v-dialog
           v-model="dialogCreateOrUpdate"
           fullscreen
@@ -96,7 +101,7 @@
                           <v-datetime-picker
                             :datetime="dateTimeDepart"
                             clear-text="Hủy"
-                            label="Thời gian Đi"
+                            label="Thời gian đi"
                             date-format="dd/MM/yyyy"
                             :text-field-props="{
                               rules: [rules.required, ruleDate],
@@ -272,12 +277,11 @@ export default {
         { text: 'Thời gian đi', value: 'NgayDi' },
         { text: 'Thời gian về', value: 'NgayVe' },
         { text: 'Thời gian ĐK', value: 'NgayDK' },
-        { text: 'Khởi hành', value: 'DiemKhoiHanh' },
-        { text: 'Nơi đến', value: 'NoiDen' },
-        { text: 'Lý do', value: 'LyDoDi' },
+        { text: 'Khởi hành', value: 'DiemKhoiHanh', width: '10%' },
+        { text: 'Nơi đến', value: 'NoiDen', width: '15%' },
+        { text: 'Lý do', value: 'LyDoDi', width: '15%' },
         { text: 'Tình trạng', value: 'GhiChuTinhTrang' },
         { text: 'Ghi chú', value: 'GhiChu' },
-        { text: '', value: 'actions', sortable: false },
       ],
       listDangKy: [],
       radioCampus: 'Cở sở 1',
@@ -312,6 +316,20 @@ export default {
       if (ngayDi.getTime() < today.getTime()) return 'Ngày đi không hợp lệ';
 
       return ngayDi.getTime() < ngayDen.getTime() || 'Thời gian không hợp lệ';
+    },
+
+    computedHeaders() {
+      if (this.tinhTrang === 3) {
+        return [
+          ...this.headers,
+          { text: 'Xe', value: 'BienSo' },
+          { text: 'Tài xế', value: 'HoTenTX' },
+          { text: 'SĐT', value: 'SoDT' },
+          { text: '', value: 'actions', sortable: false },
+        ];
+      }
+
+      return [...this.headers, { text: '', value: 'actions', sortable: false }];
     },
   },
 
