@@ -21,7 +21,10 @@
           </v-col>
           <v-col class="text-center text-md-right pa-0" cols="12" md="8">
             <v-btn
-              v-if="checkRight(userRight.nhanVienTaiXe)"
+              v-if="
+                checkRight(userRight.nhanVienTaiXe) ||
+                  checkRight(userRight.phongHanhChanh)
+              "
               text
               :outlined="menu.nhanVienTaiXe"
               @click="toggleMenu({ nhanVienTaiXe: true })"

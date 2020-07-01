@@ -180,11 +180,31 @@ export default {
     };
   },
 
-  getLichTrinhTaiXe({ id = 'NV0000220' }) {
+  /**
+   * API Nhan Vien Tai Xe
+   **/
+
+  getListNhanVienTaiXe() {
     return {
       ...Authorization,
       method: 'GET',
-      url: baseURL + `/TaiXe_XemLich/${id}`,
+      url: baseURL + `/TaiXe_Select_XemLich/`,
+    };
+  },
+
+  getListTinhTrangNhanVienTaiXe() {
+    return {
+      ...Authorization,
+      method: 'GET',
+      url: baseURL + `/TaiXe_Select_TinhTrang/`,
+    };
+  },
+
+  getLichTrinhTaiXe({ id = 'NV0000220', tinhTrang }) {
+    return {
+      ...Authorization,
+      method: 'GET',
+      url: baseURL + `/TaiXe_XemLich/${id}/${tinhTrang}`,
     };
   },
 

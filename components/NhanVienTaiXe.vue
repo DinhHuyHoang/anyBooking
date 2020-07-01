@@ -13,39 +13,22 @@
               <v-toolbar-title>Lịch trình tài xế</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
-              <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
-                <v-card v-if="Object.keys(dangKy).length">
-                  <v-toolbar dark color="primary">
-                    <v-btn icon dark @click="dialogCreateOrUpdate = false">
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                  </v-toolbar>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col>
-                          <!-- eslint-disable-next-line vue/no-v-html -->
-                          <p v-html="dangKy.messageConfirm"></p>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="blue darken-1"
-                      text
-                      @click="createOrUpdate(dangKy)"
-                    >
-                      Đồng ý
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
+              <v-select
+                v-model="taiXe"
+                item-value="TaiXeID"
+                item-text="HoTenTX"
+                :items="listTaiXe"
+                placeholder="Tài xế"
+                class="mx-2"
+              ></v-select>
+              <v-select
+                v-model="tinhTrang"
+                class="mx-2"
+                :items="listTinhTrang"
+                placeholder="Tình trạng"
+                item-text="GhiChu"
+                item-value="TinhTrang"
+              ></v-select>
             </v-toolbar>
           </template>
 
@@ -70,6 +53,38 @@
             </v-btn>
           </template>
         </v-data-table>
+
+        <!-- ************************************ Dialog ************************************ -->
+
+        <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
+          <v-card v-if="Object.keys(dangKy).length">
+            <v-toolbar dark color="primary">
+              <v-btn icon dark @click="dialogCreateOrUpdate = false">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+              <v-toolbar-title>{{ dangKy.formTitle }}</v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col>
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <p v-html="dangKy.messageConfirm"></p>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="createOrUpdate(dangKy)">
+                Đồng ý
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
     </v-row>
     <SnackBar ref="SnackBar" />
@@ -100,14 +115,52 @@ export default {
       { text: '', value: 'actions', sortable: false },
     ],
     listLichTrinhTaiXe: [],
+    listTaiXe: [],
+    taiXe: null,
+    listTinhTrang: [],
+    tinhTrang: null,
     dangKy: {},
   }),
+
+  watch: {
+    tinhTrang() {
+      if (this.tinhTrang !== null && this.taiXe !== null) {
+        this.getListLichTrinh({
+          id: this.taiXe,
+          tinhTrang: this.tinhTrang,
+        });
+      }
+    },
+
+    taiXe() {
+      if (this.tinhTrang !== null && this.taiXe !== null) {
+        this.getListLichTrinh({
+          id: this.taiXe,
+          tinhTrang: this.tinhTrang,
+        });
+      }
+    },
+  },
+
   created() {
-    this.getListLichTrinh();
+    this.getListNhanVienTaiXe();
+    this.getListTinhTrangNhanVienTaiXe();
   },
   methods: {
-    async getListLichTrinh() {
-      const { data } = await this.$axios(API.getLichTrinhTaiXe({}));
+    async getListNhanVienTaiXe() {
+      const { data } = await this.$axios(API.getListNhanVienTaiXe());
+      this.listTaiXe = data;
+    },
+
+    async getListTinhTrangNhanVienTaiXe() {
+      const { data } = await this.$axios(API.getListTinhTrangNhanVienTaiXe());
+      this.listTinhTrang = data;
+    },
+
+    async getListLichTrinh({ id, tinhTrang }) {
+      const { data } = await this.$axios(
+        API.getLichTrinhTaiXe({ id, tinhTrang })
+      );
       this.listLichTrinhTaiXe = data;
     },
 
