@@ -40,6 +40,25 @@
               mdi-delete
             </v-icon>
           </template>
+
+          <template v-slot:item.tinhTrang="{ item }">
+            <div>
+              <v-radio-group
+                v-model="item.TinhTrang"
+                row
+                @change="TinhTrang => updateStateXe({ ...item, TinhTrang })"
+              >
+                <v-radio label="Rảnh" :value="1"></v-radio>
+                <v-radio label="Bận" :value="2"></v-radio>
+              </v-radio-group>
+              <!-- <v-switch
+                v-model="item.TinhTrang"
+                class="mx-2"
+                :label="item.GhiChuTinhTrang"
+                @change="TinhTrang => updateStateXe({ ...item, TinhTrang })"
+              ></v-switch> -->
+            </div>
+          </template>
         </v-data-table>
 
         <v-dialog v-model="dialogCreateOrUpdate" max-width="500px">
@@ -144,6 +163,7 @@ export default {
       { text: 'Biển số xe', value: 'BienSo' },
       { text: 'Số chổ', value: 'SoCho' },
       { text: 'Tài xế', value: 'HoTenTX' },
+      { text: 'Tình trạng', value: 'tinhTrang' },
       { text: '', value: 'actions', sortable: false },
     ],
     listXe: [],
@@ -243,6 +263,26 @@ export default {
         });
         this.getListXe();
         this.dialogRemove = false;
+      }
+    },
+
+    async updateStateXe(xe) {
+      const { data } = await this.$axios(API.updateStateXe({ xe }));
+
+      if (data?.error && data?.error) {
+        const { message } = data;
+        this.$refs.SnackBar.notify({
+          type: 'error',
+          message,
+        });
+      } else {
+        const { message } = data;
+        this.$refs.SnackBar.notify({
+          type: 'success',
+          timeout: 1000,
+          message,
+        });
+        this.getListXe();
       }
     },
   },

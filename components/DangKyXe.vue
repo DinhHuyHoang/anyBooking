@@ -87,12 +87,20 @@
                   <v-col>
                     <v-form ref="formCreateOrUpdate">
                       <v-row>
-                        <v-col>
+                        <v-col cols="12" sm="6">
                           <v-text-field
                             v-model="soNguoiDi"
                             label="Số người đi"
                             :rules="[rules.required, rules.number]"
                             @input="dangKy['SoNguoiDi'] = soNguoiDi"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                          <v-text-field
+                            v-model="SDTLienHe"
+                            label="SDT liên hệ"
+                            :rules="[rules.required, rules.number]"
+                            @input="dangKy['SoDTUserDK'] = SDTLienHe"
                           ></v-text-field>
                         </v-col>
                       </v-row>
@@ -110,7 +118,12 @@
                             }"
                             @input="
                               value => {
-                                dangKy['NgayDi'] = value;
+                                dangKy['NgayDi'] = !!value
+                                  ? pasreDate(value.toString(), [
+                                      'MM/DD/YYYY HH:mm',
+                                      'YYYY/MM/DD HH:mm',
+                                    ])
+                                  : value;
                                 dateTimeDepart = value;
                               }
                             "
@@ -130,7 +143,12 @@
                             }"
                             @input="
                               value => {
-                                dangKy['NgayVe'] = value;
+                                dangKy['NgayVe'] = !!value
+                                  ? pasreDate(value.toString(), [
+                                      'MMMM DD YYYY HH:mm',
+                                      'YYYY/MM/DD HH:mm',
+                                    ])
+                                  : value;
                                 dateTimeArrive = value;
                               }
                             "
@@ -164,6 +182,7 @@
                                 @change="
                                   campus => {
                                     placeDepart = `${campus} Đại học Lạc Hồng`;
+                                    dangKy['DiemKhoiHanh'] = placeDepart;
                                   }
                                 "
                               >
@@ -300,6 +319,7 @@ export default {
       placeArrive: null,
       reason: null,
       soNguoiDi: null,
+      SDTLienHe: null,
       dangKy: {},
       listTinhTrang: [],
       tinhTrang: 1,
@@ -354,15 +374,24 @@ export default {
       this.placeArrive = null;
       this.reason = null;
       this.soNguoiDi = null;
+      this.SDTLienHe = null;
       this.dangKy.DiemKhoiHanh = this.placeDepart;
     },
 
-    pasreDate(dateString) {
+    pasreDate(dateString, format = null) {
+      if (!dateString) {
+        return null;
+      }
       const { $moment } = this;
+      if (format) {
+        const date = $moment(dateString).format(format[1]);
+        return date;
+      }
+
       const date = $moment(dateString, 'DD/MM/YYYY HH:mm').format(
         'YYYY/MM/DD HH:mm'
       );
-      return new Date(date);
+      return date;
     },
 
     async getListDangKy(dangKy = { TinhTrang: 1 }) {
@@ -395,13 +424,15 @@ export default {
           NgayVe,
           NoiDen,
           LyDoDi,
+          SoDTUserDK,
         } = data;
         this.soNguoiDi = SoNguoiDi;
-        this.dateTimeDepart = this.pasreDate(NgayDi);
+        this.dateTimeDepart = new Date(this.pasreDate(NgayDi));
         this.placeDepart = DiemKhoiHanh;
-        this.dateTimeArrive = this.pasreDate(NgayVe);
+        this.dateTimeArrive = new Date(this.pasreDate(NgayVe));
         this.placeArrive = NoiDen;
         this.reason = LyDoDi;
+        this.SDTLienHe = SoDTUserDK;
       }
 
       this.dangKy = dangKy;

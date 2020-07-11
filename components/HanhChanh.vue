@@ -337,7 +337,7 @@ export default {
     },
 
     async getListXe() {
-      const { data } = await this.$axios(API.getListXe());
+      const { data } = await this.$axios(API.getListXe(1));
       data.map(item => {
         item.text = `Biển số: ${item.BienSo} - số chổ: ${item.SoCho}`;
       });

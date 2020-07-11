@@ -76,11 +76,21 @@ export default {
    *  API xe
    */
 
-  getListXe() {
+  getListXe(tinhTrang = -1) {
     return {
       ...Authorization,
-      method: 'GET',
+      method: 'POST',
       url: baseURL + `/Xe_Select`,
+      data: { TinhTrang: tinhTrang },
+    };
+  },
+
+  updateStateXe({ xe }) {
+    return {
+      ...Authorization,
+      method: 'POST',
+      url: baseURL + `/obj/Xe_UpdateTinhTrang`,
+      data: { ...xe },
     };
   },
 
